@@ -5,7 +5,13 @@
     "license": "MIT",
     "author": "Jordan Patton",
     "homepage": "https://github.com/jordanpatton/shutterfly-downloader",
-    "keywords": ["downloader", "shutterfly"],
+    "keywords": [
+        "downloader",
+        "shutterfly"
+    ],
+    "dependencies": {
+        "puppeteer": "^23.4.0"
+    },
     "main": "index.js",
     "repository": {
         "type": "git",
@@ -13,5 +19,6 @@
     },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
-    }
+    },
+    "type": "module"
 }
