@@ -1,0 +1,17 @@
+{
+    "name": "shutterfly-downloader",
+    "description": "Shutterfly Downloader",
+    "version": "0.0.0",
+    "license": "MIT",
+    "author": "Jordan Patton",
+    "homepage": "https://github.com/jordanpatton/shutterfly-downloader",
+    "keywords": ["downloader", "shutterfly"],
+    "main": "index.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/jordanpatton/shutterfly-downloader.git"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    }
+}
