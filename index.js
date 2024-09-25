@@ -1,26 +1,19 @@
 import puppeteer from 'puppeteer';
 
-// Launch the browser and open a new blank page
-const browser = await puppeteer.launch();
+import { sleep } from './helpers.js';
+
+const browser = await puppeteer.launch({ headless: false });
 const page = await browser.newPage();
+await page.goto('https://accounts.shutterfly.com');
+await page.setViewport({ height: 768, width: 1024 });
+await sleep(5000);
 
-// Navigate the page to a URL.
-await page.goto('https://developer.chrome.com/');
+const emailInputHandle = await page.locator('input#email').waitHandle();
+const emailInputText = await emailInputHandle?.evaluate(element => element.textContent);
+console.log('emailInputText:', emailInputText);
 
-// Set screen size.
-await page.setViewport({ height: 1024, width: 1080 });
-
-// Type into search box.
-await page.locator('.devsite-search-field').fill('automate beyond recorder');
-
-// Wait and click on first result.
-await page.locator('.devsite-result-item-link').click();
-
-// Locate the full title with a unique string.
-const textSelector = await page.locator('text/Customize and automate').waitHandle();
-const fullTitle = await textSelector?.evaluate(el => el.textContent);
-
-// Print the full title.
-console.log('The title of this blog post is "%s".', fullTitle);
+const signInButtonHandle = await page.locator('button#signInButton.submit').waitHandle();
+const signInButtonText = await signInButtonHandle?.evaluate(element => element.textContent);
+console.log('signInButtonText:', signInButtonText);
 
 await browser.close();
