@@ -2,10 +2,18 @@ import puppeteer from 'puppeteer';
 
 import { sleep } from './helpers.js';
 
+let testTimeout;
+function test() {
+    console.log(Date.now());
+    testTimeout = setTimeout(test, 1000);
+}
+test();
+
 const browser = await puppeteer.launch({ headless: false });
-const [page] = await browser.pages();
+const [page] = await browser.pages(); // use default page
 let pageWasPrematurelyClosed = true;
 page.once('close', () => {
+    clearTimeout(testTimeout);
     // When the page is closed before the puppeteer script is complete, the node process
     // will hang. In that case we must manually terminate the node process. For some
     // unknown reason this dumps an error to stdout unless we first `browser.close()`.
@@ -14,9 +22,9 @@ page.once('close', () => {
         browser.close().finally(() => { process.exit(); });
     }
 });
+
 await page.goto('https://accounts.shutterfly.com');
 await page.setViewport({ height: 768, width: 1024 });
-
 await sleep(5000);
 
 const emailInputHandle = await page.locator('input#email').waitHandle();
