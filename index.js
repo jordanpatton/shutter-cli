@@ -4,8 +4,19 @@ import { sleep } from './helpers.js';
 
 const browser = await puppeteer.launch({ headless: false });
 const [page] = await browser.pages();
+let pageWasPrematurelyClosed = true;
+page.once('close', () => {
+    // When the page is closed before the puppeteer script is complete, the node process
+    // will hang. In that case we must manually terminate the node process. For some
+    // unknown reason this dumps an error to stdout unless we first `browser.close()`.
+    if (pageWasPrematurelyClosed) {
+        console.error('ERROR: Page was prematurely closed.');
+        browser.close().finally(() => { process.exit(); });
+    }
+});
 await page.goto('https://accounts.shutterfly.com');
 await page.setViewport({ height: 768, width: 1024 });
+
 await sleep(5000);
 
 const emailInputHandle = await page.locator('input#email').waitHandle();
@@ -18,4 +29,5 @@ if (emailInputValue.length && passwordInputValue.length) {
     console.log('FAILURE: Failed to log in.');
 }
 
+pageWasPrematurelyClosed = false;
 await browser.close();
