@@ -1,2 +1,2 @@
-# shutterfly-downloader
-Shutterfly Downloader
+# Shutterfly Downloader
+Scripts for downloading photos from Shutterfly.
