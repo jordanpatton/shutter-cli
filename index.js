@@ -1,12 +1,20 @@
 import puppeteer from 'puppeteer';
 
-import { SHUTTERFLY_LOGIN_URL_WITH_COOKIES_REDIRECT } from './constants.js';
+import {
+    BROWSER_INITIAL_HEIGHT_PIXELS,
+    BROWSER_INITIAL_WIDTH_PIXELS,
+    SHUTTERFLY_LOGIN_URL_WITH_COOKIES_REDIRECT,
+} from './constants.js';
 import { sleep } from './helpers.js';
 
 let isPollingForCookies = true;
 let pageWasPrematurelyClosed = true;
 
-const browser = await puppeteer.launch({ headless: false });
+const browser = await puppeteer.launch({
+    args: [`--window-size=${BROWSER_INITIAL_WIDTH_PIXELS},${BROWSER_INITIAL_HEIGHT_PIXELS}`],
+    defaultViewport: null, // disable default viewport
+    headless: false, // render to screen
+});
 const [page] = await browser.pages(); // use default page
 page.once('close', () => {
     isPollingForCookies = false; // stop polling for cookies
@@ -20,7 +28,6 @@ page.once('close', () => {
 });
 
 await page.goto(SHUTTERFLY_LOGIN_URL_WITH_COOKIES_REDIRECT);
-await page.setViewport({ height: 768, width: 1024 });
 
 while (isPollingForCookies) {
     const cookies = await page.cookies();
