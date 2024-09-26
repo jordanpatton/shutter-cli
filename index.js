@@ -24,7 +24,7 @@ await page.setViewport({ height: 768, width: 1024 });
 
 while (isPollingForCookies) {
     const cookies = await page.cookies();
-    const cognitoCookies = cookies.filter((cookie) => cookie.name.startsWith('Cognito'));
+    const cognitoCookies = cookies.filter(cookie => cookie.name.startsWith('Cognito'));
     if (cognitoCookies.length) {
         isPollingForCookies = false; // stop polling for cookies
         console.log(cognitoCookies.map(cookie => cookie.name));
