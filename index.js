@@ -1,11 +1,11 @@
 import puppeteer from 'puppeteer';
 
+import { sleep } from './common/AsyncRepeater.js';
 import {
     BROWSER_INITIAL_HEIGHT_PIXELS,
     BROWSER_INITIAL_WIDTH_PIXELS,
     SHUTTERFLY_LOGIN_URL_WITH_COOKIES_REDIRECT,
-} from './constants.js';
-import { sleep } from './helpers.js';
+} from './common/constants.js';
 
 let isPollingForCookies = true;
 let pageWasPrematurelyClosed = true;
