@@ -2,34 +2,42 @@
  * Repeats some user-defined logic until stopped. This is an `async`-compatible equivalent
  * of an infinite recursive loop that uses `setTimeout()` to repeat some work. Each
  * instance of `AsyncRepeater` should only ever be associated with a single
- * `asyncRepeatableFunction`. (Do not reuse instances; instead create more of them.)
+ * `repeatableFunction`. (Do not reuse instances; instead create more of them.)
  */
 export class AsyncRepeater {
     /**
+     * Promise-based sleep that suspends logic flow for `milliseconds`.
+     * ```javascript
+     * doSomethingBeforeSleep();
+     * await AsyncRepeater.sleep(1000);
+     * doSomethingAfterSleep();
+     * ```
+     * @param {number} milliseconds TODO.
+     * @returns {Promise} Promise that resolves when sleep ends.
+     */
+    static sleep(milliseconds) {
+        return new Promise(resolve => setTimeout(resolve, milliseconds));
+    }
+
+    #isRepeating = false;
+    #repeatableFunction;
+    #sleepMilliseconds = 1000;
+
+    /**
      * TODO.
-     * @param {function} asyncRepeatableFunction TODO.
+     * @param {function} repeatableFunction TODO.
      * @param {number} [sleepMilliseconds=1000] TODO.
      * @returns {object} Instance of `AsyncRepeater`.
      */
-    constructor(asyncRepeatableFunction, sleepMilliseconds = 1000) {
-        if (typeof asyncRepeatableFunction !== 'function') {
-            throw new TypeError('asyncRepeatableFunction must have type: function.');
+    constructor(repeatableFunction, sleepMilliseconds = 1000) {
+        if (typeof repeatableFunction !== 'function') {
+            throw new TypeError('repeatableFunction must have type: function.');
         }
         if (typeof sleepMilliseconds !== 'number') {
             throw new TypeError('sleepMilliseconds must have type: number.');
         }
-        this._asyncRepeatableFunction = asyncRepeatableFunction;
-        this._isRepeating = false;
-        this._sleepMilliseconds = sleepMilliseconds;
-    }
-
-    /**
-     * Sleeps `async` logic for `milliseconds`.
-     * @param {number} milliseconds TODO.
-     * @returns {Promise} Promise that resolves when sleep ends.
-     */
-    static _sleep(milliseconds) {
-        return new Promise(resolve => setTimeout(resolve, milliseconds));
+        this.#repeatableFunction = repeatableFunction;
+        this.#sleepMilliseconds = sleepMilliseconds;
     }
 
     /**
@@ -38,16 +46,16 @@ export class AsyncRepeater {
      * @param {function} callerReject TODO.
      * @returns {void}
      */
-    _repeatHelper(callerResolve, callerReject) {
-        if (this._isRepeating) {
-            const result = this._asyncRepeatableFunction();
+    #repeatHelper(callerResolve, callerReject) {
+        if (this.#isRepeating) {
+            const result = this.#repeatableFunction();
             const resultPromise = Object.prototype.toString.call(result) === '[object Promise]'
                 ? result
                 : Promise.resolve(result); // same as: new Promise(resolve => resolve(result))
             resultPromise.then(
                 () => {
-                    AsyncRepeater._sleep(this._sleepMilliseconds).then(
-                        () => { this._repeatHelper(callerResolve, callerReject); }, // recurse
+                    AsyncRepeater.sleep(this.#sleepMilliseconds).then(
+                        () => { this.#repeatHelper(callerResolve, callerReject); }, // recurse
                         () => { callerReject('ERROR: Sleep failed.'); },
                     );
                 },
@@ -64,11 +72,11 @@ export class AsyncRepeater {
      */
     repeat() {
         return new Promise((resolve, reject) => {
-            if (this._isRepeating) {
+            if (this.#isRepeating) {
                 reject('ERROR: This AsyncRepeater instance is already repeating.');
             } else {
-                this._isRepeating = true;
-                this._repeatHelper(resolve, reject);
+                this.#isRepeating = true;
+                this.#repeatHelper(resolve, reject);
             }
         });
     }
@@ -78,6 +86,6 @@ export class AsyncRepeater {
      * @returns {void}
      */
     stop() {
-        this._isRepeating = false;
+        this.#isRepeating = false;
     }
 }
