@@ -1,5 +1,3 @@
-export const sleep = async milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
-
 /**
  * Repeats some user-defined logic until stopped. This is the `async` equivalent of an
  * infinite recursive loop that uses `setTimeout()` to repeat some work. Each
@@ -7,6 +5,11 @@ export const sleep = async milliseconds => new Promise(resolve => setTimeout(res
  * `asyncRepeatableFunction`. (Do not reuse instances; instead create more of them.)
  */
 export class AsyncRepeater {
+    /**
+     * TODO.
+     * @param {function} asyncRepeatableFunction TODO.
+     * @param {number} [sleepMilliseconds=1000] TODO.
+     */
     constructor(asyncRepeatableFunction, sleepMilliseconds = 1000) {
         if (typeof asyncRepeatableFunction !== 'function') {
             throw new TypeError('asyncRepeatableFunction must have type: function.');
@@ -19,23 +22,60 @@ export class AsyncRepeater {
         this._sleepMilliseconds = sleepMilliseconds;
     }
 
-    /** Sleeps `async` logic for `milliseconds`. */
-    static async _sleep(milliseconds) {
+    /**
+     * Sleeps `async` logic for `milliseconds`.
+     * @param {number} milliseconds TODO.
+     * @returns {Promise} Promise that resolves when sleep ends.
+     */
+    static _sleep(milliseconds) {
         return new Promise(resolve => setTimeout(resolve, milliseconds));
     }
 
-    /** Repeats user-defined logic infinitely until `stop`ped. */
-    async repeat() {
-        this._isRepeating = true;
-        while (this._isRepeating) {
-            await this._asyncRepeatableFunction(this);
-            if (this._sleepMilliseconds > 0) {
-                await AsyncRepeater._sleep(this._sleepMilliseconds);
-            }
+    /**
+     * Recursively invokes user-defined logic until stopped.
+     * @param {function} callerResolve TODO.
+     * @param {function} callerReject TODO.
+     * @returns {void}
+     */
+    _repeatHelper(callerResolve, callerReject) {
+        if (this._isRepeating) {
+            const result = this._asyncRepeatableFunction();
+            const resultPromise = Object.prototype.toString.call(result) === '[object Promise]'
+                ? result
+                : Promise.resolve(result); // same as: new Promise(resolve => resolve(result))
+            resultPromise.then(
+                () => {
+                    AsyncRepeater._sleep(this._sleepMilliseconds).then(
+                        () => { this._repeatHelper(callerResolve, callerReject); }, // recurse
+                        () => { callerReject('ERROR: Sleep failed.'); },
+                    );
+                },
+                () => { callerReject('ERROR: User-defined logic failed.'); },
+            );
+        } else {
+            callerResolve();
         }
     }
 
-    /** Stops infinite repetition of user-defined logic. */
+    /**
+     * Repeats user-defined logic infinitely until stopped.
+     * @returns {Promise} Promise that resolves when the repetition stops.
+     */
+    repeat() {
+        return new Promise((resolve, reject) => {
+            if (this._isRepeating) {
+                reject('ERROR: This AsyncRepeater instance is already repeating.');
+            } else {
+                this._isRepeating = true;
+                this._repeatHelper(resolve, reject);
+            }
+        });
+    }
+
+    /**
+     * Stops infinite repetition of user-defined logic.
+     * @returns {void}
+     */
     stop() {
         this._isRepeating = false;
     }
