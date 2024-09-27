@@ -12,21 +12,26 @@ export class AsyncRepeater {
      * await AsyncRepeater.sleep(1000);
      * doSomethingAfterSleep();
      * ```
-     * @param {number} milliseconds TODO.
+     * @param {number} milliseconds How long to sleep (in milliseconds).
      * @returns {Promise} Promise that resolves when sleep ends.
      */
     static sleep(milliseconds) {
         return new Promise(resolve => setTimeout(resolve, milliseconds));
     }
 
+    /** Tracks whether or not the instance is currently repeating. */
     #isRepeating = false;
+    /** Stores the top-level promise associated with ongoing repeating logic. */
+    #repeatPromise;
+    /** User-defined function to be repeated. */
     #repeatableFunction;
+    /** How long to sleep (in milliseconds) between repetitions. */
     #sleepMilliseconds = 1000;
 
     /**
-     * TODO.
-     * @param {function} repeatableFunction TODO.
-     * @param {number} [sleepMilliseconds=1000] TODO.
+     * Returns an instance of `AsyncRepeater`.
+     * @param {function} repeatableFunction User-defined function to be repeated.
+     * @param {number} [sleepMilliseconds=1000] How long to sleep (in milliseconds) between repetitions.
      * @returns {object} Instance of `AsyncRepeater`.
      */
     constructor(repeatableFunction, sleepMilliseconds = 1000) {
@@ -42,8 +47,8 @@ export class AsyncRepeater {
 
     /**
      * Recursively invokes user-defined logic until stopped.
-     * @param {function} callerResolve TODO.
-     * @param {function} callerReject TODO.
+     * @param {function} callerResolve `resolve` function from caller `Promise`.
+     * @param {function} callerReject `reject` function from caller `Promise`.
      * @returns {void}
      */
     #repeatHelper(callerResolve, callerReject) {
@@ -67,11 +72,14 @@ export class AsyncRepeater {
     }
 
     /**
-     * Repeats user-defined logic infinitely until stopped.
-     * @returns {Promise} Promise that resolves when the repetition stops.
+     * `await`able. Repeats user-defined logic infinitely until stopped.
+     * @returns {Promise} Promise that resolves when repetition stops.
      */
     repeat() {
-        return new Promise((resolve, reject) => {
+        // Store a reference to the top-level `Promise` so we can return it from this
+        // function and the `stop` function. Doing so allows the user to `await` either
+        // of these functions and avoid any race conditions.
+        this.#repeatPromise = new Promise((resolve, reject) => {
             if (this.#isRepeating) {
                 reject('ERROR: This AsyncRepeater instance is already repeating.');
             } else {
@@ -79,13 +87,17 @@ export class AsyncRepeater {
                 this.#repeatHelper(resolve, reject);
             }
         });
+        return this.#repeatPromise;
     }
 
     /**
-     * Stops infinite repetition of user-defined logic.
-     * @returns {void}
+     * `await`able. Stops infinite repetition of user-defined logic.
+     * @returns {Promise} Promise that resolves when repetition stops.
      */
     stop() {
         this.#isRepeating = false;
+        return Object.prototype.toString.call(this.#repeatPromise) === '[object Promise]'
+            ? this.#repeatPromise
+            : Promise.resolve(); // same as: new Promise(resolve => resolve())
     }
 }
