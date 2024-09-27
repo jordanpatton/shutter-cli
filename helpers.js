@@ -1,6 +1,6 @@
 /**
- * Repeats some user-defined logic until stopped. This is the `async` equivalent of an
- * infinite recursive loop that uses `setTimeout()` to repeat some work. Each
+ * Repeats some user-defined logic until stopped. This is an `async`-compatible equivalent
+ * of an infinite recursive loop that uses `setTimeout()` to repeat some work. Each
  * instance of `AsyncRepeater` should only ever be associated with a single
  * `asyncRepeatableFunction`. (Do not reuse instances; instead create more of them.)
  */
@@ -9,6 +9,7 @@ export class AsyncRepeater {
      * TODO.
      * @param {function} asyncRepeatableFunction TODO.
      * @param {number} [sleepMilliseconds=1000] TODO.
+     * @returns {object} Instance of `AsyncRepeater`.
      */
     constructor(asyncRepeatableFunction, sleepMilliseconds = 1000) {
         if (typeof asyncRepeatableFunction !== 'function') {
