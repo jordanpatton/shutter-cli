@@ -54,10 +54,7 @@ export class AsyncRepeater {
     #repeatHelper(callerResolve, callerReject) {
         if (this.#isRepeating) {
             const result = this.#repeatableFunction();
-            const resultPromise = Object.prototype.toString.call(result) === '[object Promise]'
-                ? result
-                : Promise.resolve(result); // same as: new Promise(resolve => resolve(result))
-            resultPromise.then(
+            (result instanceof Promise ? result : Promise.resolve(result)).then(
                 () => {
                     AsyncRepeater.sleep(this.#sleepMilliseconds).then(
                         () => { this.#repeatHelper(callerResolve, callerReject); }, // recurse
@@ -81,7 +78,7 @@ export class AsyncRepeater {
         // of these functions and avoid any race conditions.
         this.#repeatPromise = new Promise((resolve, reject) => {
             if (this.#isRepeating) {
-                reject('ERROR: This AsyncRepeater instance is already repeating.');
+                reject('ERROR: This instance is already repeating.');
             } else {
                 this.#isRepeating = true;
                 this.#repeatHelper(resolve, reject);
@@ -91,13 +88,31 @@ export class AsyncRepeater {
     }
 
     /**
-     * `await`able. Stops infinite repetition of user-defined logic.
+     * `await`able. Stops infinite repetition of user-defined logic. WARNING: Incorrect
+     * use of this function creates a race condition. DO NOT do this:
+     * ```javascript
+     * const asyncRepeater = new AsyncRepeater(...);
+     * asyncRepeater.repeat();
+     * asyncRepeater.stop(); // BAD! May not finish before next line.
+     * asyncRepeater.repeat();
+     * ```
+     * Instead, `await` the `stop()` method before invoking `repeat()` again...
+     * ```javascript
+     * const asyncRepeater = new AsyncRepeater(...);
+     * asyncRepeater.repeat();
+     * await asyncRepeater.stop(); // GOOD!
+     * asyncRepeater.repeat();
+     * ```
+     * ...or use the `Promise`-based equivalent:
+     * ```javascript
+     * const asyncRepeater = new AsyncRepeater(...);
+     * asyncRepeater.repeat();
+     * asyncRepeater.stop().then(() => {asyncRepeater.repeat();}); // GOOD!
+     * ```
      * @returns {Promise} Promise that resolves when repetition stops.
      */
     stop() {
-        this.#isRepeating = false;
-        return Object.prototype.toString.call(this.#repeatPromise) === '[object Promise]'
-            ? this.#repeatPromise
-            : Promise.resolve(); // same as: new Promise(resolve => resolve())
+        this.#isRepeating = false; // will cause `#repeatHelper` to stop recursing
+        return this.#repeatPromise instanceof Promise ? this.#repeatPromise : Promise.resolve();
     }
 }
