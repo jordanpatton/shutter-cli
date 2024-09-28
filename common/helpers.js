@@ -32,22 +32,18 @@ const repeatAsyncHelper = (taskFunction, sleepMilliseconds, callerResolve, calle
     if (typeof callerReject !== 'function') {
         throw new TypeError('callerReject must have type: function.');
     }
-    console.log('repeatAsyncHelper 1');
     const result = taskFunction();
-    console.log('repeatAsyncHelper 2', result);
     (result instanceof Promise ? result : Promise.resolve(result)).then(
         (shouldContinue = false) => {
             if (typeof shouldContinue !== 'boolean') {
                 throw new TypeError('shouldContinue must have type: boolean.');
             }
             if (shouldContinue) {
-                console.log('repeatAsyncHelper 3', shouldContinue);
                 sleepAsync(sleepMilliseconds).then(
-                    () => {console.log('repeatAsyncHelper 4'); repeatAsyncHelper(taskFunction, sleepMilliseconds, callerResolve, callerReject);}, // recurse
+                    () => {repeatAsyncHelper(taskFunction, sleepMilliseconds, callerResolve, callerReject);}, // recurse
                     () => {callerReject('ERROR: Sleep failed.');},
                 );
             } else {
-                console.log('repeatAsyncHelper 5');
                 callerResolve(); // instead of recursing, just invoke caller's resolve()
             }
         },
