@@ -1,8 +1,10 @@
+const DEFAULT_SLEEP_MILLISECONDS = 1000;
+
 /**
- * Repeats some user-defined logic until stopped. This is an `async`-compatible equivalent
+ * Repeats some user-defined task until stopped. This is an `async`-compatible equivalent
  * of an infinite recursive loop that uses `setTimeout()` to repeat some work. Each
  * instance of `AsyncRepeater` should only ever be associated with a single
- * `repeatableFunction`. (Do not reuse instances; instead create more of them.)
+ * `taskFunction`. (DO NOT reuse instances. Instead, create more of them.)
  */
 export class AsyncRepeater {
     /**
@@ -19,49 +21,49 @@ export class AsyncRepeater {
         return new Promise(resolve => setTimeout(resolve, milliseconds));
     }
 
-    /** Tracks whether or not the instance is currently repeating. */
+    /** Whether or not this instance is currently repeating. */
     #isRepeating = false;
-    /** Stores the top-level promise associated with ongoing repeating logic. */
-    #repeatPromise;
-    /** User-defined function to be repeated. */
-    #repeatableFunction;
+    /** Top-level promise associated with ongoing repetition. */
+    #masterPromise;
     /** How long to sleep (in milliseconds) between repetitions. */
-    #sleepMilliseconds = 1000;
+    #sleepMilliseconds = DEFAULT_SLEEP_MILLISECONDS;
+    /** User-defined task to be repeated. */
+    #taskFunction;
 
     /**
      * Returns an instance of `AsyncRepeater`.
-     * @param {function} repeatableFunction User-defined function to be repeated.
-     * @param {number} [sleepMilliseconds=1000] How long to sleep (in milliseconds) between repetitions.
+     * @param {function} taskFunction User-defined task to be repeated.
+     * @param {number} [sleepMilliseconds=DEFAULT_SLEEP_MILLISECONDS] How long to sleep (in milliseconds) between repetitions.
      * @returns {object} Instance of `AsyncRepeater`.
      */
-    constructor(repeatableFunction, sleepMilliseconds = 1000) {
-        if (typeof repeatableFunction !== 'function') {
-            throw new TypeError('repeatableFunction must have type: function.');
+    constructor(taskFunction, sleepMilliseconds = DEFAULT_SLEEP_MILLISECONDS) {
+        if (typeof taskFunction !== 'function') {
+            throw new TypeError('taskFunction must have type: function.');
         }
         if (typeof sleepMilliseconds !== 'number') {
             throw new TypeError('sleepMilliseconds must have type: number.');
         }
-        this.#repeatableFunction = repeatableFunction;
+        this.#taskFunction = taskFunction;
         this.#sleepMilliseconds = sleepMilliseconds;
     }
 
     /**
-     * Recursively invokes user-defined logic until stopped.
+     * Recursively invokes user-defined task until stopped.
      * @param {function} callerResolve `resolve` function from caller `Promise`.
      * @param {function} callerReject `reject` function from caller `Promise`.
      * @returns {void}
      */
-    #repeatHelper(callerResolve, callerReject) {
+    #startHelper(callerResolve, callerReject) {
         if (this.#isRepeating) {
-            const result = this.#repeatableFunction();
+            const result = this.#taskFunction();
             (result instanceof Promise ? result : Promise.resolve(result)).then(
                 () => {
                     AsyncRepeater.sleep(this.#sleepMilliseconds).then(
-                        () => { this.#repeatHelper(callerResolve, callerReject); }, // recurse
+                        () => { this.#startHelper(callerResolve, callerReject); }, // recurse
                         () => { callerReject('ERROR: Sleep failed.'); },
                     );
                 },
-                () => { callerReject('ERROR: User-defined logic failed.'); },
+                () => { callerReject('ERROR: User-defined task failed.'); },
             );
         } else {
             callerResolve();
@@ -69,50 +71,50 @@ export class AsyncRepeater {
     }
 
     /**
-     * `await`able. Repeats user-defined logic infinitely until stopped.
+     * `await`able. Starts repeating user-defined task infinitely until stopped.
      * @returns {Promise} Promise that resolves when repetition stops.
      */
-    repeat() {
+    start() {
         // Store a reference to the top-level `Promise` so we can return it from this
         // function and the `stop` function. Doing so allows the user to `await` either
         // of these functions and avoid any race conditions.
-        this.#repeatPromise = new Promise((resolve, reject) => {
+        this.#masterPromise = new Promise((resolve, reject) => {
             if (this.#isRepeating) {
                 reject('ERROR: This instance is already repeating.');
             } else {
                 this.#isRepeating = true;
-                this.#repeatHelper(resolve, reject);
+                this.#startHelper(resolve, reject);
             }
         });
-        return this.#repeatPromise;
+        return this.#masterPromise;
     }
 
     /**
-     * `await`able. Stops infinite repetition of user-defined logic. WARNING: Incorrect
+     * `await`able. Stops infinite repetition of user-defined task. WARNING: Incorrect
      * use of this function creates a race condition. DO NOT do this:
      * ```javascript
      * const asyncRepeater = new AsyncRepeater(...);
-     * asyncRepeater.repeat();
+     * asyncRepeater.start();
      * asyncRepeater.stop(); // BAD! May not finish before next line.
-     * asyncRepeater.repeat();
+     * asyncRepeater.start();
      * ```
-     * Instead, `await` the `stop()` method before invoking `repeat()` again...
+     * Instead, `await` the `stop()` method before invoking `start()` again...
      * ```javascript
      * const asyncRepeater = new AsyncRepeater(...);
-     * asyncRepeater.repeat();
+     * asyncRepeater.start();
      * await asyncRepeater.stop(); // GOOD!
-     * asyncRepeater.repeat();
+     * asyncRepeater.start();
      * ```
      * ...or use the `Promise`-based equivalent:
      * ```javascript
      * const asyncRepeater = new AsyncRepeater(...);
-     * asyncRepeater.repeat();
-     * asyncRepeater.stop().then(() => {asyncRepeater.repeat();}); // GOOD!
+     * asyncRepeater.start();
+     * asyncRepeater.stop().then(() => {asyncRepeater.start();}); // GOOD!
      * ```
      * @returns {Promise} Promise that resolves when repetition stops.
      */
     stop() {
-        this.#isRepeating = false; // will cause `#repeatHelper` to stop recursing
-        return this.#repeatPromise instanceof Promise ? this.#repeatPromise : Promise.resolve();
+        this.#isRepeating = false; // will cause `#startHelper` to stop recursing
+        return this.#masterPromise instanceof Promise ? this.#masterPromise : Promise.resolve();
     }
 }
