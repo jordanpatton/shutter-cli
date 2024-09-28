@@ -1,3 +1,4 @@
+const DEFAULT_SHOULD_AUTOSTART = false;
 const DEFAULT_SLEEP_MILLISECONDS = 1000;
 
 /**
@@ -34,17 +35,28 @@ export class AsyncRepeater {
      * Returns an instance of `AsyncRepeater`.
      * @param {function} taskFunction User-defined task to be repeated.
      * @param {number} [sleepMilliseconds=DEFAULT_SLEEP_MILLISECONDS] How long to sleep (in milliseconds) between repetitions.
-     * @returns {object} Instance of `AsyncRepeater`.
+     * @param {boolean} [shouldAutostart=DEFAULT_SHOULD_AUTOSTART] Whether or not to automatically start repeating.
+     * @returns {AsyncRepeater} Instance of `AsyncRepeater`.
      */
-    constructor(taskFunction, sleepMilliseconds = DEFAULT_SLEEP_MILLISECONDS) {
+    constructor(
+        taskFunction,
+        sleepMilliseconds = DEFAULT_SLEEP_MILLISECONDS,
+        shouldAutostart = DEFAULT_SHOULD_AUTOSTART,
+    ) {
         if (typeof taskFunction !== 'function') {
             throw new TypeError('taskFunction must have type: function.');
         }
         if (typeof sleepMilliseconds !== 'number') {
             throw new TypeError('sleepMilliseconds must have type: number.');
         }
+        if (typeof shouldAutostart !== 'boolean') {
+            throw new TypeError('shouldAutostart must have type: boolean.');
+        }
         this.#taskFunction = taskFunction;
         this.#sleepMilliseconds = sleepMilliseconds;
+        if (shouldAutostart) {
+            this.start();
+        }
     }
 
     /**
