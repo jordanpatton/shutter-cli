@@ -39,7 +39,7 @@ await page.goto(SHUTTERFLY_LOGIN_URL_WITH_COOKIES_REDIRECT);
 sleepAsync(TIME_TO_POLL_FOR_COOKIES_MILLISECONDS).then(() => {
     shouldContinuePollingForCookies = false; // stop polling for cookies
 });
-await repeatAsync(async () => {
+await repeatAsync(async (STOP_SIGNAL) => {
     console.log('Polling for Cognito cookies...');
     const cookies = await page.cookies();
     const cognitoCookies = cookies.filter(cookie => cookie.name.startsWith('Cognito'));
@@ -48,7 +48,9 @@ await repeatAsync(async () => {
         console.log(cognitoCookies.map(cookie => cookie.name));
         shouldContinuePollingForCookies = false; // stop polling for cookies
     }
-    return shouldContinuePollingForCookies;
+    if (!shouldContinuePollingForCookies) {
+        return STOP_SIGNAL;
+    }
 });
 
 puppeteerScriptIsFinished = true;
