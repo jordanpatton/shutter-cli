@@ -14,7 +14,7 @@ export const sleepAsync = (milliseconds) => new Promise(resolve => setTimeout(re
  * Recursively invokes user-defined `taskFunction` until stopped. The continue/stop signal
  * comes from `taskFunction`'s return value.
  * @param {function} taskFunction User-defined task to be repeated. If `taskFunction` returns `false`, then repetition will stop. If `taskFunction` returns `true`, then repetition will continue.
- * @param {function} sleepMilliseconds How long to sleep (in milliseconds) between repetitions.
+ * @param {number} sleepMilliseconds How long to sleep (in milliseconds) between repetitions.
  * @param {function} callerResolve `resolve` function from caller `Promise`.
  * @param {function} callerReject `reject` function from caller `Promise`.
  * @returns {void}
@@ -55,7 +55,7 @@ const repeatAsyncHelper = (taskFunction, sleepMilliseconds, callerResolve, calle
  * Repeats user-defined `taskFunction` until stopped. This is an `async`-compatible
  * infinite recursion loop. The continue/stop signal comes `taskFunction`'s return value.
  * @param {function} taskFunction User-defined task to be repeated. If `taskFunction` returns `false`, then repetition will stop. If `taskFunction` returns `true`, then repetition will continue.
- * @param {function} sleepMilliseconds How long to sleep (in milliseconds) between repetitions.
+ * @param {number} [sleepMilliseconds=1000] How long to sleep (in milliseconds) between repetitions.
  * @returns {Promise} Resolves or rejects when repetition stops.
  */
 export const repeatAsync = (taskFunction, sleepMilliseconds = 1000) => {
