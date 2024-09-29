@@ -20,7 +20,7 @@ const browser = await puppeteer.launch({
 });
 const [page] = await browser.pages(); // use default page
 page.once('close', () => {
-    shouldContinuePollingForCookies = false;
+    shouldContinuePollingForCookies = false; // stop polling for cookies
     // When the page is closed before the puppeteer script is finished, the node process
     // will hang. In that case we must manually terminate the node process. For some
     // unknown reason this dumps an error to stdout unless we first `browser.close()`.
@@ -36,7 +36,7 @@ await page.goto(SHUTTERFLY_LOGIN_URL_WITH_COOKIES_REDIRECT);
 // `sleepAsync` invocation because doing so would prevent the actual polling logic from
 // executing before the timer runs out.
 sleepAsync(TIME_TO_POLL_FOR_COOKIES_MILLISECONDS).then(() => {
-    shouldContinuePollingForCookies = false;
+    shouldContinuePollingForCookies = false; // stop polling for cookies
 });
 await repeatAsync(async () => {
     console.log('Polling for Cognito cookies...');
