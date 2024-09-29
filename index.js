@@ -6,7 +6,8 @@ import {
     SHUTTERFLY_LOGIN_URL_WITH_COOKIES_REDIRECT,
     TIME_TO_POLL_FOR_COOKIES_MILLISECONDS,
 } from './common/constants.js';
-import { repeatAsync, sleepAsync } from './common/helpers.js';
+import { repeatAsync } from './common/helpers/repeatAsync.js';
+import { sleepAsync } from './common/helpers/sleepAsync.js';
 
 /** Whether or not the puppeteer script has completed its operations. */
 let puppeteerScriptIsFinished = false;
