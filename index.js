@@ -31,7 +31,8 @@ page.once('close', () => {
 
 await page.goto(SHUTTERFLY_LOGIN_URL_WITH_COOKIES_REDIRECT);
 
-// Poll for cookies every 1 second for 60 seconds, then give up.
+// Wait for the user to log in and hydrate their Cognito cookies. While we wait, poll for
+// Cognito cookies every 1 second for 60 seconds before giving up.
 await repeatAsync(async (STOP_SIGNAL) => {
     console.log('Polling for Cognito cookies...');
     const cookies = await page.cookies();
