@@ -4,10 +4,8 @@ import {
     BROWSER_INITIAL_HEIGHT_PIXELS,
     BROWSER_INITIAL_WIDTH_PIXELS,
     SHUTTERFLY_LOGIN_URL_WITH_COOKIES_REDIRECT,
-    TIME_TO_POLL_FOR_COOKIES_MILLISECONDS,
 } from './common/constants.js';
 import { repeatAsync } from './common/helpers/repeatAsync.js';
-import { sleepAsync } from './common/helpers/sleepAsync.js';
 
 /** Whether or not the puppeteer script has completed its operations. */
 let puppeteerScriptIsFinished = false;
@@ -33,12 +31,7 @@ page.once('close', () => {
 
 await page.goto(SHUTTERFLY_LOGIN_URL_WITH_COOKIES_REDIRECT);
 
-// Poll for cookies for a limited amount of time, then give up. Do not `await` this
-// `sleepAsync` invocation because doing so would prevent the actual polling logic from
-// executing before the timer runs out.
-sleepAsync(TIME_TO_POLL_FOR_COOKIES_MILLISECONDS).then(() => {
-    shouldContinuePollingForCookies = false; // stop polling for cookies
-});
+// Poll for cookies every 1 second for 60 seconds, then give up.
 await repeatAsync(async (STOP_SIGNAL) => {
     console.log('Polling for Cognito cookies...');
     const cookies = await page.cookies();
@@ -51,7 +44,7 @@ await repeatAsync(async (STOP_SIGNAL) => {
     if (!shouldContinuePollingForCookies) {
         return STOP_SIGNAL;
     }
-});
+}, 1000, 60000);
 
 puppeteerScriptIsFinished = true;
 await browser.close();
