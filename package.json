@@ -12,16 +12,18 @@
     "dependencies": {
         "puppeteer": "^23.4.0"
     },
+    "devDependencies": {
+        "typescript": "^5.6.2"
+    },
     "main": "index.js",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/jordanpatton/shutterfly-downloader.git"
     },
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "build": "echo \"TODO\" && exit 1",
+        "start": "node ./src/index.js",
+        "test": "echo \"TODO\" && exit 1"
     },
-    "type": "module",
-    "devDependencies": {
-        "typescript": "^5.6.2"
-    }
+    "type": "module"
 }

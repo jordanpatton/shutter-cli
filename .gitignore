@@ -130,4 +130,6 @@ dist
 .pnp.*
 
 # custom
+.DS_Store
+dist/
 ignore/
