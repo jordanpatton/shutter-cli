@@ -3,6 +3,7 @@
         "allowJs": true,
         "outDir": "./dist",
         "skipLibCheck": true,
+        "strict": true,
         "target": "es5"
     },
     "include": [

@@ -5,8 +5,9 @@
  * await sleepAsync(1000); // or `sleepAsync(1000).then(doSomethingAfterSleep);`
  * doSomethingAfterSleep();
  * ```
- * @param {number} milliseconds How long to sleep (in milliseconds).
  * @returns {Promise} Resolves when sleep ends.
  */
-export const sleepAsync = (milliseconds: number): Promise<void> =>
-    new Promise(resolve => setTimeout(resolve, milliseconds));
+export const sleepAsync = (
+    /** How long to sleep (in milliseconds). */
+    milliseconds: number,
+): Promise<void> => new Promise(resolve => setTimeout(resolve, milliseconds));
