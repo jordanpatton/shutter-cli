@@ -53,7 +53,7 @@ export const repeatAsync = (
     /** User-defined behavior to be repeated. May return `STOP_SIGNAL` to stop repetition. */
     task: (stopSignal: typeof STOP_SIGNAL) => Promise<typeof STOP_SIGNAL | void> | typeof STOP_SIGNAL | void,
     /** How long to sleep (in milliseconds) between `task` invocations. */
-    sleepMilliseconds = 1000,
+    sleepMilliseconds: number = 1000,
     /** How long to continue repeating (in milliseconds) before timing out. */
     timeToLiveMilliseconds?: number,
 ): Promise<void> => (
