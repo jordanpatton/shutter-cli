@@ -7,7 +7,7 @@ export const STOP_SIGNAL = 'REPEAT_ASYNC_STOP_SIGNAL';
  * Recursively invokes user-defined `task` until stopped. Repetition stops when `task`
  * returns `STOP_SIGNAL` or `timeToLiveMilliseconds` runs out.
  * @param {function} task User-defined behavior to be repeated. May return `STOP_SIGNAL` to stop repetition.
- * @param {number} sleepMilliseconds How long to sleep (in milliseconds) between repetitions.
+ * @param {number} sleepMilliseconds How long to sleep (in milliseconds) between `task` invocations.
  * @param {number} [timeToLiveMilliseconds] How long to continue repeating (in milliseconds) before timing out.
  * @param {number} startTimeMilliseconds Time (in milliseconds since Unix epoch) since repetition started.
  * @param {function} callerResolve `resolve` function from caller `Promise`.
@@ -59,7 +59,7 @@ const repeatAsyncHelper = (task, sleepMilliseconds, timeToLiveMilliseconds, star
  * Repeats user-defined `task` until stopped. Repetition stops when `task` returns
  * `STOP_SIGNAL` or `timeToLiveMilliseconds` runs out. `async`-compatible.
  * @param {function} task User-defined behavior to be repeated. May return `STOP_SIGNAL` to stop repetition.
- * @param {number} [sleepMilliseconds=1000] How long to sleep (in milliseconds) between repetitions.
+ * @param {number} [sleepMilliseconds=1000] How long to sleep (in milliseconds) between `task` invocations.
  * @param {number} [timeToLiveMilliseconds] How long to continue repeating (in milliseconds) before timing out.
  * @returns {Promise} Resolves or rejects when repetition stops.
  */
