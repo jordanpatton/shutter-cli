@@ -2,6 +2,7 @@
     "compilerOptions": {
         "allowJs": true,
         "outDir": "./dist",
+        "skipLibCheck": true,
         "target": "es5"
     },
     "include": [

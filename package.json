@@ -21,7 +21,7 @@
         "url": "git+https://github.com/jordanpatton/shutterfly-downloader.git"
     },
     "scripts": {
-        "build": "echo \"TODO\" && exit 1",
+        "build": "npx tsc",
         "start": "node ./src/index.js",
         "test": "echo \"TODO\" && exit 1"
     },
