@@ -1,4 +1,4 @@
-import { sleepAsync } from './sleepAsync';
+import { sleepAsync } from './sleepAsync.js';
 
 /** Repetition stops when this signal is returned by `task`. */
 export const STOP_SIGNAL = 'REPEAT_ASYNC_STOP_SIGNAL';

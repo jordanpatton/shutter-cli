@@ -4,8 +4,8 @@ import {
     BROWSER_INITIAL_HEIGHT_PIXELS,
     BROWSER_INITIAL_WIDTH_PIXELS,
     SHUTTERFLY_LOGIN_URL_WITH_COOKIES_REDIRECT,
-} from './common/constants';
-import { repeatAsync } from './common/helpers/repeatAsync';
+} from './common/constants.js';
+import { repeatAsync } from './common/helpers/repeatAsync.js';
 
 const logInToShutterflyViaPuppeteer = async (): Promise<Cookie[]> => {
     /** Cookies associated with the browser's session on shutterfly.com. */

@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "allowJs": true,
+        "module": "NodeNext",
         "noImplicitAny": true,
         "outDir": "./dist",
         "skipLibCheck": true,
