@@ -1,8 +1,7 @@
 import { THISLIFE_JSON_URL } from './common/constants.js';
+import { IThisLifeApiResponseJson } from './common/types.js';
 
-/** Payload format for failed request. */
-type TGetSkeletonResponseJsonFailurePayload = [];
-/** Payload format for successful request. */
+/** Payload format for successful request to `getSkeleton`. */
 interface IGetSkeletonResponseJsonSuccessPayload {
     momentCount: number;
     signature: number;
@@ -14,19 +13,7 @@ interface IGetSkeletonResponseJsonSuccessPayload {
     }[];
 }
 /** Response json format for `getSkeleton`. */
-interface IGetSkeletonResponseJson {
-    /** Unknown format; have only seen `null`. */
-    error: any;
-    id: string;
-    result: {
-        _explicitType: string;
-        /** Unknown format; have only seen `null`. */
-        errors: any;
-        message: string;
-        payload: TGetSkeletonResponseJsonFailurePayload | IGetSkeletonResponseJsonSuccessPayload;
-        success: boolean;
-    }
-}
+type TGetSkeletonResponseJson = IThisLifeApiResponseJson<IGetSkeletonResponseJsonSuccessPayload>;
 
 /**
  * Fetches basic skeleton that Shutterfly uses to construct the photo library page and
@@ -34,15 +21,15 @@ interface IGetSkeletonResponseJson {
  * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
  * @returns Promisified skeleton. Settles when skeleton is ready.
  */
-export const fetchSkeletonViaAPI = async (
+export const fetchSkeletonViaApi = async (
     cognitoIdToken: string,
 ): Promise<IGetSkeletonResponseJsonSuccessPayload['skeleton'] | undefined> => {
     const response = await fetch(`${THISLIFE_JSON_URL}?method=getSkeleton`, {
         body: `{"method":"getSkeleton","params":["${cognitoIdToken}",false],"headers":{"X-SFLY-SubSource":"library"},"id":null}`,
         method: 'POST'
     });
-    const responseJson: IGetSkeletonResponseJson = await response.json();
-    return typeof responseJson.result.payload === 'object'
+    const responseJson: TGetSkeletonResponseJson = await response.json();
+    return responseJson.result.success && typeof responseJson.result.payload === 'object'
         ? (responseJson.result.payload as IGetSkeletonResponseJsonSuccessPayload).skeleton
         : undefined;
 };

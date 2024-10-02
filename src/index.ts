@@ -1,4 +1,5 @@
-import { fetchSkeletonViaAPI } from './fetchSkeletonViaAPI.js';
+import { fetchPaginatedMomentsViaApi } from './fetchPaginatedMomentsViaApi.js';
+import { fetchSkeletonViaApi } from './fetchSkeletonViaApi.js';
 import { logInToShutterflyViaPuppeteer } from './logInToShutterflyViaPuppeteer.js';
 
 /**
@@ -11,8 +12,10 @@ const downloadPhotosFromShutterfly = async (): Promise<void> => {
         console.log('ERROR: Failed to log in to Shutterfly.');
         return;
     }
-    const skeleton = await fetchSkeletonViaAPI(cognitoIdToken);
+    const skeleton = await fetchSkeletonViaApi(cognitoIdToken);
     console.log(skeleton);
+    const moments = await fetchPaginatedMomentsViaApi(cognitoIdToken);
+    console.log(moments);
     return;
 };
 
