@@ -13,9 +13,14 @@ const downloadPhotosFromShutterfly = async (): Promise<void> => {
         return;
     }
     const skeleton = await fetchSkeletonViaApi(cognitoIdToken);
+    if (!Array.isArray(skeleton) || !skeleton.length) {
+        console.log('ERROR: Failed to fetch skeleton.');
+        return;
+    }
+    // TODO: sort skeleton by date, extract min/max, add/subtract 1 day, convert to seconds, pass to fetchPaginatedMomentsViaApi
     console.log(skeleton);
-    const moments = await fetchPaginatedMomentsViaApi(cognitoIdToken);
-    console.log(moments);
+    // const moments = await fetchPaginatedMomentsViaApi(cognitoIdToken);
+    // console.log(moments);
     return;
 };
 
