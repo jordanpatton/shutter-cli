@@ -1,12 +1,12 @@
 /** Response json format for ThisLife API. */
 export interface IThisLifeApiResponseJson<TSuccessPayload> {
-    /** Unknown format; have only seen `null`. */
+    /** Known good values: `null`. */
     error: any;
     id: string;
     result: {
-        /** Have only seen `'ResponseWrapper'`. */
+        /** Known good values: `'ResponseWrapper'`. */
         _explicitType: string;
-        /** Unknown format; have only seen `null`. */
+        /** Known good values: `null`. */
         errors: any;
         message: string;
         /** Payload is `[]` on failure or API-method-specific format on success. */

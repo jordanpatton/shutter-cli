@@ -13,7 +13,7 @@ interface IGetPaginatedMomentsResponseJsonSuccessPayload {
         life_uid: string;
         /** Stringified `number`. Seconds since Unix epoch. */
         moment_date: string;
-        /** We want the value to be `'image'`. */
+        /** Known good values: `'image'`. */
         moment_type: string;
         /** Pixels. */
         orig_height: number;
@@ -23,8 +23,9 @@ interface IGetPaginatedMomentsResponseJsonSuccessPayload {
         /** Stringified `number`. */
         uid: string;
     }[];
+    /** Whether or not more pages are available. */
     morePages: boolean;
-    /** Stringified `number`. Seconds since Unix epoch. */
+    /** Seconds since Unix epoch. NOT stringified. */
     oldestMomentTimestamp: number;
     signature: number;
 }
