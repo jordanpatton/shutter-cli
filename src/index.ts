@@ -30,7 +30,7 @@ const downloadPhotosFromShutterfly = async (): Promise<void> => {
     console.log('\nCalculating start and end times from skeleton...');
     console.group();
     skeleton.sort((a, b) => (new Date(a.date)).getTime() - (new Date(b.date)).getTime());
-    // `skeleton[...].date` is a `string` with format YYYY-mm-dd.
+    // `skeleton[].date` is a `string` with format YYYY-mm-dd.
     const { date: earliestSkeletonDateString } = skeleton[0];
     const { date: latestSkeletonDateString } = skeleton[skeleton.length - 1];
     console.log(`Skeleton date range: ${earliestSkeletonDateString} to ${latestSkeletonDateString}.`);
@@ -50,7 +50,7 @@ const downloadPhotosFromShutterfly = async (): Promise<void> => {
 
     console.log('\nFetching moments...');
     console.group();
-    const todo = await fetchPaginatedMomentsViaApi(cognitoIdToken, startTimeUnixSeconds, endTimeUnixSeconds);
+    const todo = await fetchPaginatedMomentsViaApi(cognitoIdToken, startTimeUnixSeconds, endTimeUnixSeconds, 2);
     console.log(JSON.stringify(todo, null, 4))
     console.groupEnd();
     console.log('...done!');

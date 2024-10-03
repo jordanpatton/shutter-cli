@@ -19,7 +19,7 @@ type TGetSkeletonResponseJson = IThisLifeApiResponseJson<IGetSkeletonResponseJso
  * Fetches basic skeleton that Shutterfly uses to construct the photo library page and
  * perform various other requests.
  * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
- * @returns Promisified skeleton. Settles when skeleton is ready.
+ * @returns Promisified response payload. Settles when payload is ready.
  */
 export const fetchSkeletonViaApi = async (
     cognitoIdToken: string,

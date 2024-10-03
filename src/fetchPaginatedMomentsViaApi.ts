@@ -3,11 +3,13 @@ import { IThisLifeApiResponseJson } from './common/types.js';
 
 /** Payload format for successful request to `getPaginatedMoments`. */
 interface IGetPaginatedMomentsResponseJsonSuccessPayload {
+    /** Can also be a hexadecimal-encoded string, but we intentionally ignore that fact. */
     moments: {
         /** Stringified `number`. Seconds since Unix epoch. */
         created: string;
         /** Stringified `number`. Seconds since Unix epoch. */
         effects_modified_date: string;
+        /** Technically optional if you disable encryption, but we intentionally ignore that fact. */
         encrypted_id: string;
         /** Stringified `number`. */
         life_uid: string;
@@ -33,26 +35,37 @@ interface IGetPaginatedMomentsResponseJsonSuccessPayload {
 type TGetPaginatedMomentsResponseJson = IThisLifeApiResponseJson<IGetPaginatedMomentsResponseJsonSuccessPayload>;
 
 /**
- * Fetches paginated moments.
+ * Fetches paginated moments from newest to oldest.
+ * - In order to paginate, you must hold `startTimeUnixSeconds` constant and shift
+ *   `endTimeUnixSeconds` earlier after each request (replace with `oldestMomentTimestamp`
+ *   from response) until `morePages` is `false`.
+ * - After each request, you *must* verify that `oldestMomentTimestamp` is not the same as
+ *   the prior request. If it is the same, then there are too many items sharing the same
+ *   `moment_date`, and you will be caught in an infinite loop. You must either increase
+ *   `maximumNumberOfItemsPerPage` until `oldestMomentTimestamp` changes OR error out.
+ * - After completing multiple pagination requests, you should de-duplicate the
+ *   accumulated moments by `uid` due to the remote API's weird date-based paging.
  * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
  * @param startTimeUnixSeconds - Start time in seconds since Unix epoch.
  * @param endTimeUnixSeconds - End time in seconds since Unix epoch.
- * @returns Promisified moments. Settles when moments are ready.
+ * @param maximumNumberOfItemsPerPage - Maximum number of items per page.
+ * @returns Promisified response payload. Settles when payload is ready.
  */
 export const fetchPaginatedMomentsViaApi = async (
     cognitoIdToken: string,
-    startTimeUnixSeconds: number | string,
-    endTimeUnixSeconds: number | string,
+    startTimeUnixSeconds: number,
+    endTimeUnixSeconds: number,
+    maximumNumberOfItemsPerPage: number = 2000,
 ): Promise<IGetPaginatedMomentsResponseJsonSuccessPayload> => {
     const stringifiedBodyParams: string[] = [
-        `"${cognitoIdToken}"`,       // {string} Amazon Cognito identification token.
-        `"${startTimeUnixSeconds}"`, // {string} Start time in seconds since Unix epoch.
-        `"${endTimeUnixSeconds}"`,   // {string} End time in seconds since Unix epoch.
-        '2',                         // {number} Maximum number of items per page. // TODO: 2000
-        'false',                     // {boolean} Whether or not to sort by upload date.
-        'false',                     // {boolean} Whether or not to get hexed data.
-        '""',                        // {string} Moment type. Known good values: "", "image".
-        'true',                      // {boolean} Whether or not to encrypt moments.
+        `"${cognitoIdToken}"`,            // {string} Amazon Cognito identification token.
+        `"${startTimeUnixSeconds}"`,      // {string} Start time in seconds since Unix epoch.
+        `"${endTimeUnixSeconds}"`,        // {string} End time in seconds since Unix epoch.
+        `${maximumNumberOfItemsPerPage}`, // {number} Maximum number of items per page.
+        'false',                          // {boolean} Whether or not to sort by upload date.
+        'false',                          // {boolean} Whether or not to return `moments` as a hexadecimal-encoded string.
+        '""',                             // {string} Moment type. Known good values: "", "image".
+        'true',                           // {boolean} Whether or not to include `encrypted_id` in returned `moments` items.
     ];
     const response = await fetch(`${THISLIFE_JSON_URL}?method=getPaginatedMoments`, {
         body: `{"method":"getPaginatedMoments","params":[${stringifiedBodyParams.join(',')}],"headers":{"X-SFLY-SubSource":"library"},"id":null}`,
