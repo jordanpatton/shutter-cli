@@ -12,19 +12,18 @@ const downloadPhotosFromShutterfly = async (): Promise<void> => {
     console.group();
     const cognitoIdToken = await logInToShutterflyViaPuppeteer();
     if (typeof cognitoIdToken !== 'string' || !cognitoIdToken.length) {
-        console.log('ERROR: Failed to log in to Shutterfly.');
-        return;
+        throw new Error('ERROR: Failed to log in to Shutterfly.');
     }
     console.groupEnd();
     console.log('...done!');
 
     console.log('\nFetching photo library page skeleton...');
     console.group();
-    const skeleton = await fetchSkeletonViaApi(cognitoIdToken);
+    const { momentCount, skeleton } = await fetchSkeletonViaApi(cognitoIdToken);
     if (!Array.isArray(skeleton) || !skeleton.length) {
-        console.log('ERROR: Failed to fetch skeleton.');
-        return;
+        throw new Error('ERROR: Malformed skeleton.');
     }
+    console.log(`Skeleton contains ${momentCount} moments.`);
     console.groupEnd();
     console.log('...done!');
 
@@ -45,14 +44,14 @@ const downloadPhotosFromShutterfly = async (): Promise<void> => {
         Math.round(((new Date(latestSkeletonDateString)).getTime() + ONE_DAY_IN_MILLISECONDS) / 1000),
         Number.MAX_SAFE_INTEGER
     );
-    console.log(`Calculated time range (epoch seconds): ${startTimeUnixSeconds} to ${endTimeUnixSeconds}.`);
+    console.log(`Calculated time range (Unix seconds): ${startTimeUnixSeconds} to ${endTimeUnixSeconds}.`);
     console.groupEnd();
     console.log('...done!');
 
     console.log('\nFetching moments...');
     console.group();
-    // const moments = await fetchPaginatedMomentsViaApi(cognitoIdToken);
-    // console.log(moments);
+    const todo = await fetchPaginatedMomentsViaApi(cognitoIdToken, startTimeUnixSeconds, endTimeUnixSeconds);
+    console.log(JSON.stringify(todo, null, 4))
     console.groupEnd();
     console.log('...done!');
 

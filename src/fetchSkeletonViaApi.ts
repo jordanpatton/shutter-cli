@@ -23,13 +23,20 @@ type TGetSkeletonResponseJson = IThisLifeApiResponseJson<IGetSkeletonResponseJso
  */
 export const fetchSkeletonViaApi = async (
     cognitoIdToken: string,
-): Promise<IGetSkeletonResponseJsonSuccessPayload['skeleton'] | undefined> => {
+): Promise<IGetSkeletonResponseJsonSuccessPayload> => {
+    const stringifiedBodyParams: string[] = [
+        `"${cognitoIdToken}"`, // {string} Amazon Cognito identification token.
+        'false',               // {boolean} Whether or not to sort by upload date.
+    ];
     const response = await fetch(`${THISLIFE_JSON_URL}?method=getSkeleton`, {
-        body: `{"method":"getSkeleton","params":["${cognitoIdToken}",false],"headers":{"X-SFLY-SubSource":"library"},"id":null}`,
+        body: `{"method":"getSkeleton","params":[${stringifiedBodyParams.join(',')}],"headers":{"X-SFLY-SubSource":"library"},"id":null}`,
         method: 'POST'
     });
     const responseJson: TGetSkeletonResponseJson = await response.json();
-    return responseJson.result.success && typeof responseJson.result.payload === 'object'
-        ? (responseJson.result.payload as IGetSkeletonResponseJsonSuccessPayload).skeleton
-        : undefined;
+    // HTTP response code may be 200, but response body can still indicate failure.
+    if (!responseJson.result.success || typeof responseJson.result.payload !== 'object') {
+        throw new Error('ERROR: Failed to fetch skeleton.');
+    }
+    // else
+    return responseJson.result.payload as IGetSkeletonResponseJsonSuccessPayload;
 };

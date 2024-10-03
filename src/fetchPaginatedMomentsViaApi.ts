@@ -34,19 +34,34 @@ type TGetPaginatedMomentsResponseJson = IThisLifeApiResponseJson<IGetPaginatedMo
 /**
  * Fetches paginated moments.
  * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
+ * @param startTimeUnixSeconds - Start time in seconds since Unix epoch.
+ * @param endTimeUnixSeconds - End time in seconds since Unix epoch.
  * @returns Promisified moments. Settles when moments are ready.
  */
 export const fetchPaginatedMomentsViaApi = async (
     cognitoIdToken: string,
-): Promise<IGetPaginatedMomentsResponseJsonSuccessPayload['moments'] | undefined> => {
+    startTimeUnixSeconds: number | string,
+    endTimeUnixSeconds: number | string,
+): Promise<IGetPaginatedMomentsResponseJsonSuccessPayload> => {
+    const stringifiedBodyParams: string[] = [
+        `"${cognitoIdToken}"`,       // {string} Amazon Cognito identification token.
+        `"${startTimeUnixSeconds}"`, // {string} Start time in seconds since Unix epoch.
+        `"${endTimeUnixSeconds}"`,   // {string} End time in seconds since Unix epoch.
+        '2',                         // {number} Maximum number of items per page. // TODO: 2000
+        'false',                     // {boolean} Whether or not to sort by upload date.
+        'false',                     // {boolean} Whether or not to get hexed data.
+        '""',                        // {string} Moment type. Known good values: "", "image".
+        'true',                      // {boolean} Whether or not to encrypt moments.
+    ];
     const response = await fetch(`${THISLIFE_JSON_URL}?method=getPaginatedMoments`, {
-        body: `{"method":"getPaginatedMoments","params":["${cognitoIdToken}","1189382400","1727136000",2000,false,false,"",true],"headers":{"X-SFLY-SubSource":"library"},"id":null}`,
+        body: `{"method":"getPaginatedMoments","params":[${stringifiedBodyParams.join(',')}],"headers":{"X-SFLY-SubSource":"library"},"id":null}`,
         method: 'POST'
     });
-    console.log(response);
     const responseJson: TGetPaginatedMomentsResponseJson = await response.json();
-    console.log(responseJson);
-    return responseJson.result.success && typeof responseJson.result.payload === 'object'
-        ? (responseJson.result.payload as IGetPaginatedMomentsResponseJsonSuccessPayload).moments
-        : undefined;
+    // HTTP response code may be 200, but response body can still indicate failure.
+    if (!responseJson.result.success || typeof responseJson.result.payload !== 'object') {
+        throw new Error('ERROR: Failed to fetch paginated moments.');
+    }
+    // else
+    return responseJson.result.payload as IGetPaginatedMomentsResponseJsonSuccessPayload;
 };
