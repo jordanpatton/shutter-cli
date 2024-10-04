@@ -87,8 +87,14 @@ const fetchPaginatedMomentsViaApi = async (
     return responseJson.result.payload as IGetPaginatedMomentsResponseJsonSuccessPayload;
 };
 
-/** TODO. */
-export const fetchMomentsViaApi = async (
+/**
+ * Fetches all moments for a given time range.
+ * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
+ * @param startTimeUnixSeconds - Start of time range in seconds since Unix epoch.
+ * @param endTimeUnixSeconds - End of time range in seconds since Unix epoch.
+ * @returns Promisified array of moments.
+ */
+export const fetchMoments = async (
     cognitoIdToken: string,
     startTimeUnixSeconds: number,
     endTimeUnixSeconds: number,
