@@ -100,17 +100,35 @@ export const fetchMoments = async (
     endTimeUnixSeconds: number,
 ): Promise<IMoment[]> => {
     let allMoments: IMoment[] = [];
+    let numberOfIterations = 1;
+    let previousOldestMomentTimestamp: number | undefined;
     while (true) {
-        const { moments } = await fetchPaginatedMomentsViaApi(cognitoIdToken, startTimeUnixSeconds, endTimeUnixSeconds, 2);
+        const { moments, oldestMomentTimestamp } = await fetchPaginatedMomentsViaApi(
+            cognitoIdToken,
+            startTimeUnixSeconds,
+            typeof previousOldestMomentTimestamp === 'number' ? previousOldestMomentTimestamp : endTimeUnixSeconds,
+            2, // TODO: pick a better default
+        );
+        // Validate moments.
         if (!Array.isArray(moments)) {
             throw new Error('ERROR: Malformed moments.');
         }
-        // TODO: check that `oldestMomentTimestamp` is changing after each request and is LOWER each time
-        // TODO: deduplicate by `uid` as we go (instead of at the end of all requests)
-        allMoments = [...allMoments, ...moments];
-        // TODO: console.log status updates
+        // `oldestMomentTimestamp` must decrease with every iteration or else we're stuck in an infinite loop.
+        if (typeof previousOldestMomentTimestamp === 'number' && oldestMomentTimestamp >= previousOldestMomentTimestamp) {
+            throw new Error('ERROR: Infinite loop while fetching moments.');
+        } else {
+            previousOldestMomentTimestamp = oldestMomentTimestamp;
+        }
+        // Deduplicate and accumulate moments.
+        const deduplicatedMoments = moments.filter(v => !allMoments.some(w => w.uid === v.uid));
+        allMoments = [...allMoments, ...deduplicatedMoments];
+        console.log(`Request #${numberOfIterations} succeeded. Fetched ${moments.length} moments (duplicates: ${moments.length - deduplicatedMoments.length}; total: ${allMoments.length}; oldest: ${oldestMomentTimestamp}).`);
         // TODO: break when `morePages` is `false`
-        break; // TODO: remove this when other break condition is done
+        if (numberOfIterations >= 2) {
+            break; // TODO: remove this when other break condition is done
+        } else {
+            numberOfIterations++;
+        }
     }
     return allMoments;
 };
