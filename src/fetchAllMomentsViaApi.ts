@@ -53,8 +53,8 @@ type TGetPaginatedMomentsResponseJson = IThisLifeApiResponseJson<IGetPaginatedMo
  * - **DEDUPLICATION:** After completing multiple pagination requests, you should
  *   deduplicate the accumulated moments by `uid`.
  * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
- * @param startTimeUnixSeconds - Start time in seconds since Unix epoch.
- * @param endTimeUnixSeconds - End time in seconds since Unix epoch.
+ * @param startTimeUnixSeconds - Start time in seconds since Unix epoch. Should remain constant across requests.
+ * @param endTimeUnixSeconds - End time in seconds since Unix epoch. Should decrease with each request.
  * @param maximumNumberOfItemsPerPage - Maximum number of items per page.
  * @returns Promisified response payload. Settles when payload is ready.
  */
