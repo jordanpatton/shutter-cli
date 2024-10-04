@@ -1,5 +1,5 @@
 import { ONE_DAY_IN_MILLISECONDS } from './common/constants.js';
-import { fetchPaginatedMomentsViaApi } from './fetchPaginatedMomentsViaApi.js';
+import { fetchAllMomentsViaApi } from './fetchAllMomentsViaApi.js';
 import { fetchSkeletonViaApi } from './fetchSkeletonViaApi.js';
 import { logInToShutterflyViaPuppeteer } from './logInToShutterflyViaPuppeteer.js';
 
@@ -50,8 +50,8 @@ const downloadPhotosFromShutterfly = async (): Promise<void> => {
 
     console.log('\nFetching moments...');
     console.group();
-    const todo = await fetchPaginatedMomentsViaApi(cognitoIdToken, startTimeUnixSeconds, endTimeUnixSeconds, 2);
-    console.log(JSON.stringify(todo, null, 4))
+    const allMoments = await fetchAllMomentsViaApi(cognitoIdToken, startTimeUnixSeconds, endTimeUnixSeconds);
+    console.log(JSON.stringify(allMoments, null, 4))
     console.groupEnd();
     console.log('...done!');
 

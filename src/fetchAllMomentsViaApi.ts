@@ -1,30 +1,32 @@
 import { THISLIFE_JSON_URL } from './common/constants.js';
 import { IThisLifeApiResponseJson } from './common/types.js';
 
+/** Moment object from ThisLife API. */
+interface IMoment {
+    /** Stringified `number`. Seconds since Unix epoch. */
+    created: string;
+    /** Stringified `number`. Seconds since Unix epoch. */
+    effects_modified_date: string;
+    /** Technically optional if you disable encryption, but we intentionally ignore that fact. */
+    encrypted_id: string;
+    /** Stringified `number`. */
+    life_uid: string;
+    /** Stringified `number`. Seconds since Unix epoch. */
+    moment_date: string;
+    /** Known good values: `'image'`. */
+    moment_type: string;
+    /** Pixels. */
+    orig_height: number;
+    /** Pixels. */
+    orig_width: number;
+    rating: number;
+    /** Stringified `number`. */
+    uid: string;
+}
 /** Payload format for successful request to `getPaginatedMoments`. */
 interface IGetPaginatedMomentsResponseJsonSuccessPayload {
     /** Can also be a hexadecimal-encoded string, but we intentionally ignore that fact. */
-    moments: {
-        /** Stringified `number`. Seconds since Unix epoch. */
-        created: string;
-        /** Stringified `number`. Seconds since Unix epoch. */
-        effects_modified_date: string;
-        /** Technically optional if you disable encryption, but we intentionally ignore that fact. */
-        encrypted_id: string;
-        /** Stringified `number`. */
-        life_uid: string;
-        /** Stringified `number`. Seconds since Unix epoch. */
-        moment_date: string;
-        /** Known good values: `'image'`. */
-        moment_type: string;
-        /** Pixels. */
-        orig_height: number;
-        /** Pixels. */
-        orig_width: number;
-        rating: number;
-        /** Stringified `number`. */
-        uid: string;
-    }[];
+    moments: IMoment[];
     /** Whether or not more pages are available. */
     morePages: boolean;
     /** Seconds since Unix epoch. NOT stringified. */
@@ -43,15 +45,15 @@ type TGetPaginatedMomentsResponseJson = IThisLifeApiResponseJson<IGetPaginatedMo
  *   the prior request. If it is the same, then there are too many items sharing the same
  *   `moment_date`, and you will be caught in an infinite loop. You must either increase
  *   `maximumNumberOfItemsPerPage` until `oldestMomentTimestamp` changes OR error out.
- * - After completing multiple pagination requests, you should de-duplicate the
- *   accumulated moments by `uid` due to the remote API's weird date-based paging.
+ * - After completing multiple pagination requests, you should deduplicate the accumulated
+ *   moments by `uid` due to the remote API's weird date-based paging.
  * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
  * @param startTimeUnixSeconds - Start time in seconds since Unix epoch.
  * @param endTimeUnixSeconds - End time in seconds since Unix epoch.
  * @param maximumNumberOfItemsPerPage - Maximum number of items per page.
  * @returns Promisified response payload. Settles when payload is ready.
  */
-export const fetchPaginatedMomentsViaApi = async (
+const fetchPaginatedMomentsViaApi = async (
     cognitoIdToken: string,
     startTimeUnixSeconds: number,
     endTimeUnixSeconds: number,
@@ -78,4 +80,26 @@ export const fetchPaginatedMomentsViaApi = async (
     }
     // else
     return responseJson.result.payload as IGetPaginatedMomentsResponseJsonSuccessPayload;
+};
+
+/** TODO. */
+export const fetchAllMomentsViaApi = async (
+    cognitoIdToken: string,
+    startTimeUnixSeconds: number,
+    endTimeUnixSeconds: number,
+): Promise<IMoment[]> => {
+    let allMoments: IMoment[] = [];
+    while (true) {
+        const { moments } = await fetchPaginatedMomentsViaApi(cognitoIdToken, startTimeUnixSeconds, endTimeUnixSeconds, 2);
+        if (!Array.isArray(moments)) {
+            throw new Error('ERROR: Malformed moments.');
+        }
+        // TODO: check that `oldestMomentTimestamp` is changing after each request and is LOWER each time
+        // TODO: deduplicate by `uid` as we go (instead of at the end of all requests)
+        allMoments = [...allMoments, ...moments];
+        // TODO: console.log status updates
+        // TODO: break when `morePages` is `false`
+        break; // TODO: remove this when other break condition is done
+    }
+    return allMoments;
 };
