@@ -4,12 +4,13 @@ import { logInToShutterflyViaPuppeteer } from './logInToShutterflyViaPuppeteer.j
 
 /**
  * Downloads photos from Shutterfly.
- * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
+ * @param parameters - Object with parameters.
  * @returns Promisified void. Settles when workflow is done.
  */
 const downloadPhotosFromShutterfly = async ({
     cognitoIdToken: givenCognitoIdToken,
 }: {
+    /** Identification token from Amazon Cognito authentication service. */
     cognitoIdToken?: string;
 }): Promise<void> => {
     let cognitoIdToken: string;
