@@ -41,12 +41,17 @@ type TGetPaginatedMomentsResponseJson = IThisLifeApiResponseJson<IGetPaginatedMo
  * - In order to paginate, you must hold `startTimeUnixSeconds` constant and shift
  *   `endTimeUnixSeconds` earlier after each request (replace with `oldestMomentTimestamp`
  *   from response) until `morePages` is `false`.
- * - After each request, you *must* verify that `oldestMomentTimestamp` is not the same as
- *   the prior request. If it is the same, then there are too many items sharing the same
- *   `moment_date`, and you will be caught in an infinite loop. You must either increase
- *   `maximumNumberOfItemsPerPage` until `oldestMomentTimestamp` changes OR error out.
- * - After completing multiple pagination requests, you should deduplicate the accumulated
- *   moments by `uid` due to the remote API's weird date-based paging.
+ * - **DO NOT** subtract time from `oldestMomentTimestamp` before using it to replace
+ *   `endTimeUnixSeconds` between requests. Doing so could cause you to skip moments that
+ *   share the same `moment_date`. Instead, you'll need to manually check for an infinite
+ *   loop and deduplicate the results. (Yes, the remote API's paging system sucks.)
+ * - **INFINITE LOOP:** After each request, you must verify that `oldestMomentTimestamp`
+ *   is not the same as the prior request. If it is the same, then there are too many
+ *   items sharing the same `moment_date`, and you will be caught in an infinite loop. You
+ *   must either increase `maximumNumberOfItemsPerPage` until `oldestMomentTimestamp`
+ *   changes OR error out.
+ * - **DEDUPLICATION:** After completing multiple pagination requests, you should
+ *   deduplicate the accumulated moments by `uid`.
  * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
  * @param startTimeUnixSeconds - Start time in seconds since Unix epoch.
  * @param endTimeUnixSeconds - End time in seconds since Unix epoch.
