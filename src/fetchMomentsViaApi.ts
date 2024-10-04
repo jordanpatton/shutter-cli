@@ -88,7 +88,7 @@ const fetchPaginatedMomentsViaApi = async (
 };
 
 /** TODO. */
-export const fetchAllMomentsViaApi = async (
+export const fetchMomentsViaApi = async (
     cognitoIdToken: string,
     startTimeUnixSeconds: number,
     endTimeUnixSeconds: number,
