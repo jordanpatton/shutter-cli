@@ -42,6 +42,12 @@ const downloadPhotosFromShutterfly = async ({
     console.groupEnd();
     console.log('...done!');
 
+    console.log('\nDownloading photos...');
+    console.group();
+    console.log(JSON.stringify(moments, null, 4));
+    console.groupEnd();
+    console.log('...done!');
+
     return;
 };
 

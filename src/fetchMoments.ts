@@ -102,6 +102,7 @@ export const fetchMoments = async (
     let accumulatedMoments: IMoment[] = [];
     let previousOldestMomentTimestamp: number | undefined;
     for (let i = 0; true; i++) {
+        // Fetch a page of moments. Pagination occurs from newest to oldest, so end time is the only moving target.
         const { moments, morePages, oldestMomentTimestamp } = await fetchPaginatedMomentsViaApi(
             cognitoIdToken,
             startTimeUnixSeconds,
