@@ -39,7 +39,6 @@ const downloadPhotosFromShutterfly = async ({
     console.log('\nBuilding list of downloadable photos...');
     console.group();
     const moments = await fetchMoments(cognitoIdToken, startTimeUnixSeconds, endTimeUnixSeconds);
-    console.log(JSON.stringify(moments, null, 4))
     console.groupEnd();
     console.log('...done!');
 
