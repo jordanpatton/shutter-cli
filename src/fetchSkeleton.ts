@@ -49,10 +49,14 @@ const fetchSkeletonViaApi = async (
 export const fetchSkeleton = async (
     cognitoIdToken: string,
 ): Promise<{
+    /** Earliest date string in skeleton items. */
+    earliestDateString: string;
     /** Derived end time in seconds since Unix epoch. */
     endTimeUnixSeconds: number;
+    /** Latest date string in skeleton items. */
+    latestDateString: string;
     /** **Total** number of moments in skeleton (including those outside the time range). */
-    numberOfSkeletonMoments: IGetSkeletonResponseJsonSuccessPayload['momentCount'];
+    numberOfMoments: IGetSkeletonResponseJsonSuccessPayload['momentCount'];
     /** Derived start time in seconds since Unix epoch. */
     startTimeUnixSeconds: number;
 }> => {
@@ -60,25 +64,16 @@ export const fetchSkeleton = async (
     if (!Array.isArray(skeleton) || !skeleton.length) {
         throw new Error('ERROR: Malformed skeleton.');
     }
-    console.log(`Skeleton contains ${momentCount} moments.`);
 
     // `skeleton[].date` is a `string` with format YYYY-mm-dd.
     skeleton.sort((a, b) => (new Date(a.date)).getTime() - (new Date(b.date)).getTime());
-    const { date: earliestSkeletonDateString } = skeleton[0];
-    const { date: latestSkeletonDateString } = skeleton[skeleton.length - 1];
-    console.log(`Skeleton date range: ${earliestSkeletonDateString} to ${latestSkeletonDateString}.`);
+    const { date: earliestDateString } = skeleton[0];
+    const { date: latestDateString } = skeleton[skeleton.length - 1];
 
-    // Start time is 24 hours earlier than `earliestSkeletonDateString`.
-    const startTimeUnixSeconds = Math.max(
-        Math.round(((new Date(earliestSkeletonDateString)).getTime() - ONE_DAY_IN_MILLISECONDS) / 1000),
-        0
-    );
-    // End time is 24 hours later than `latestSkeletonDateString`.
-    const endTimeUnixSeconds = Math.min(
-        Math.round(((new Date(latestSkeletonDateString)).getTime() + ONE_DAY_IN_MILLISECONDS) / 1000),
-        Number.MAX_SAFE_INTEGER
-    );
-    console.log(`Calculated time range (Unix seconds): ${startTimeUnixSeconds} to ${endTimeUnixSeconds}.`);
+    // Start time is one day earlier than `earliestDateString`.
+    const startTimeUnixSeconds = Math.round(((new Date(earliestDateString)).getTime() - ONE_DAY_IN_MILLISECONDS) / 1000);
+    // End time is one day later than `latestDateString`.
+    const endTimeUnixSeconds = Math.round(((new Date(latestDateString)).getTime() + ONE_DAY_IN_MILLISECONDS) / 1000);
 
-    return { endTimeUnixSeconds, numberOfSkeletonMoments: momentCount, startTimeUnixSeconds };
+    return { earliestDateString, endTimeUnixSeconds, latestDateString, numberOfMoments: momentCount, startTimeUnixSeconds };
 };

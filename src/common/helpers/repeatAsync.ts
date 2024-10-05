@@ -56,8 +56,7 @@ export const repeatAsync = (
     task: (stopSignal: typeof STOP_SIGNAL) => Promise<typeof STOP_SIGNAL | void> | typeof STOP_SIGNAL | void,
     sleepMilliseconds: number = 1000,
     timeToLiveMilliseconds?: number,
-): Promise<void> => (
+): Promise<void> =>
     new Promise((resolve, reject) => {
         repeatAsyncHelper(resolve, reject, task, sleepMilliseconds, Date.now(), timeToLiveMilliseconds);
-    })
-);
+    });

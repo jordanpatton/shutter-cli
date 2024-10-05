@@ -10,9 +10,15 @@ import { logInToShutterflyViaPuppeteer } from './logInToShutterflyViaPuppeteer.j
  */
 const downloadPhotosFromShutterfly = async ({
     cognitoIdToken: givenCognitoIdToken,
+    endTime: givenEndTime,
+    startTime: givenStartTime,
 }: {
     /** Identification token from Amazon Cognito authentication service. */
     cognitoIdToken?: string;
+    /** End of time range. Must be parsable by `new Date()`. */
+    endTime?: string;
+    /** Start of time range. Must be parsable by `new Date()`. */
+    startTime?: string;
 }): Promise<void> => {
     console.log('\nAuthenticating...');
     console.group();
@@ -34,7 +40,28 @@ const downloadPhotosFromShutterfly = async ({
 
     console.log('\nDetermining time range...');
     console.group();
-    const { endTimeUnixSeconds, startTimeUnixSeconds } = await fetchSkeleton(cognitoIdToken);
+    let startTimeUnixSeconds: number | undefined;
+    let endTimeUnixSeconds: number | undefined;
+    if (typeof givenStartTime === 'string' && givenStartTime.length) {
+        startTimeUnixSeconds = Math.round((new Date(givenStartTime)).getTime() / 1000);
+        console.log(`Using start time from command line: ${givenStartTime} (${startTimeUnixSeconds})`);
+    }
+    if (typeof givenEndTime === 'string' && givenEndTime.length) {
+        endTimeUnixSeconds = Math.round((new Date(givenEndTime)).getTime() / 1000);
+        console.log(`Using end time from command line: ${givenEndTime} (${endTimeUnixSeconds})`);
+    }
+    if (typeof startTimeUnixSeconds !== 'number' || typeof endTimeUnixSeconds !== 'number') {
+        console.log('Fetching skeleton...');
+        const o = await fetchSkeleton(cognitoIdToken);
+        if (typeof startTimeUnixSeconds !== 'number') {
+            startTimeUnixSeconds = o.startTimeUnixSeconds;
+            console.log(`Using start time from skeleton: ${o.earliestDateString} minus 1 day (${startTimeUnixSeconds})`);
+        }
+        if (typeof endTimeUnixSeconds !== 'number') {
+            endTimeUnixSeconds = o.endTimeUnixSeconds;
+            console.log(`Using end time from skeleton: ${o.latestDateString} plus 1 day (${endTimeUnixSeconds})`);
+        }
+    }
     console.groupEnd();
     console.log('...done!');
 
@@ -53,4 +80,8 @@ const downloadPhotosFromShutterfly = async ({
     return;
 };
 
-downloadPhotosFromShutterfly({ cognitoIdToken: getCommandLineParameter('--cognitoIdToken').value });
+downloadPhotosFromShutterfly({
+    cognitoIdToken: getCommandLineParameter('--cognitoIdToken').value,
+    endTime: getCommandLineParameter('--endTime').value,
+    startTime: getCommandLineParameter('--startTime').value,
+});
