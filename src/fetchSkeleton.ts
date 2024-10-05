@@ -69,6 +69,7 @@ export const fetchSkeleton = async (
     skeleton.sort((a, b) => (new Date(a.date)).getTime() - (new Date(b.date)).getTime());
     const { date: earliestDateString } = skeleton[0];
     const { date: latestDateString } = skeleton[skeleton.length - 1];
+    console.log(`Request succeeded. ${momentCount} moments are available from ${earliestDateString} to ${latestDateString}.`);
 
     // Start time is one day earlier than `earliestDateString`.
     const startTimeUnixSeconds = Math.round(((new Date(earliestDateString)).getTime() - ONE_DAY_IN_MILLISECONDS) / 1000);
