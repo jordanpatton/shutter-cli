@@ -55,14 +55,14 @@ type TGetPaginatedMomentsResponseJson = IThisLifeApiResponseJson<IGetPaginatedMo
  * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
  * @param startTimeUnixSeconds - Start time in seconds since Unix epoch. Should remain constant across requests.
  * @param endTimeUnixSeconds - End time in seconds since Unix epoch. Should decrease with each request.
- * @param maximumNumberOfItemsPerPage - Maximum number of items per page.
+ * @param maximumNumberOfItemsPerPage - Maximum number of items per page. Should be large to avoid an infinite loop.
  * @returns Promisified response payload. Settles when payload is ready.
  */
 const fetchPaginatedMomentsViaApi = async (
     cognitoIdToken: string,
     startTimeUnixSeconds: number,
     endTimeUnixSeconds: number,
-    maximumNumberOfItemsPerPage: number = 2000,
+    maximumNumberOfItemsPerPage: number = 1000,
 ): Promise<IGetPaginatedMomentsResponseJsonSuccessPayload> => {
     const stringifiedBodyParams: string[] = [
         `"${cognitoIdToken}"`,            // {string} Amazon Cognito identification token.
@@ -99,15 +99,14 @@ export const fetchMoments = async (
     startTimeUnixSeconds: number,
     endTimeUnixSeconds: number,
 ): Promise<IMoment[]> => {
-    let allMoments: IMoment[] = [];
-    let numberOfIterations = 1;
+    let accumulatedMoments: IMoment[] = [];
     let previousOldestMomentTimestamp: number | undefined;
-    while (true) {
-        const { moments, oldestMomentTimestamp } = await fetchPaginatedMomentsViaApi(
+    for (let i = 0; true; i++) {
+        const { moments, morePages, oldestMomentTimestamp } = await fetchPaginatedMomentsViaApi(
             cognitoIdToken,
             startTimeUnixSeconds,
             typeof previousOldestMomentTimestamp === 'number' ? previousOldestMomentTimestamp : endTimeUnixSeconds,
-            2, // TODO: pick a better default
+            1000, // The more items per page, the less likely it is that we'll end up in an infinite loop.
         );
         // Validate moments.
         if (!Array.isArray(moments)) {
@@ -115,20 +114,20 @@ export const fetchMoments = async (
         }
         // `oldestMomentTimestamp` must decrease with every iteration or else we're stuck in an infinite loop.
         if (typeof previousOldestMomentTimestamp === 'number' && oldestMomentTimestamp >= previousOldestMomentTimestamp) {
+            // Alternatively, we could increase number of items per page and try again (instead of erroring out).
             throw new Error('ERROR: Infinite loop while fetching moments.');
         } else {
             previousOldestMomentTimestamp = oldestMomentTimestamp;
         }
         // Deduplicate and accumulate moments.
-        const deduplicatedMoments = moments.filter(v => !allMoments.some(w => w.uid === v.uid));
-        allMoments = [...allMoments, ...deduplicatedMoments];
-        console.log(`Request #${numberOfIterations} succeeded. Fetched ${moments.length} moments (duplicates: ${moments.length - deduplicatedMoments.length}; total: ${allMoments.length}; oldest: ${oldestMomentTimestamp}).`);
-        // TODO: break when `morePages` is `false`
-        if (numberOfIterations >= 2) {
-            break; // TODO: remove this when other break condition is done
-        } else {
-            numberOfIterations++;
+        const deduplicatedMoments = moments.filter(v => !accumulatedMoments.some(w => w.uid === v.uid));
+        accumulatedMoments = [...accumulatedMoments, ...deduplicatedMoments];
+        // Notify user of progress.
+        console.log(`Request #${i + 1} succeeded. Fetched ${moments.length} moments (duplicates: ${moments.length - deduplicatedMoments.length}; total: ${accumulatedMoments.length}; oldest: ${oldestMomentTimestamp}).`);
+        // Stop iterating if there are no more pages.
+        if (!morePages) {
+            break;
         }
     }
-    return allMoments;
+    return accumulatedMoments;
 };
