@@ -1,9 +1,9 @@
-import { createWriteStream, existsSync, PathLike } from 'node:fs';
+import { createWriteStream, existsSync, PathLike as TPathLike } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { Readable } from 'node:stream';
 import { finished } from 'node:stream/promises';
-import { ReadableStream } from 'node:stream/web';
+import { ReadableStream as IReadableStream } from 'node:stream/web';
 
 /**
  * Returns the file name from a `Content-Disposition` header. For CORS requests, the
@@ -62,13 +62,15 @@ export const downloadAsync = async ({
     url,
 }: {
     fileName?: string | ((contentDispositionFileName: ReturnType<typeof getFileNameFromContentDispositionHeader>) => string);
-    toDirectory?: PathLike,
+    toDirectory?: TPathLike,
     url: Parameters<typeof fetch>[0],
 }): Promise<void> => {
+    // Request file.
     const response = await fetch(url);
     if (response.body === null) {
         throw new Error('Response body is null.');
     }
+    // Determine file name.
     const contentDispositionFileName = getFileNameFromContentDispositionHeader(response.headers.get('Content-Disposition'));
     const _fileName: string = typeof fileName === 'string'
         ? fileName
@@ -85,5 +87,5 @@ export const downloadAsync = async ({
     // const fullPath = resolve(String(toDirectory), fileName);
     // const writeStream = createWriteStream(fullPath);
 
-    // await finished(Readable.fromWeb(response.body as ReadableStream<any>).pipe(writeStream));
+    // await finished(Readable.fromWeb(response.body as IReadableStream<any>).pipe(writeStream));
 };
