@@ -11,14 +11,18 @@ import { ReadableStream as IReadableStream } from 'node:stream/web';
  * `Content-Disposition` header will not be present in the response. When used with nodejs
  * (not a browser) CORS does not apply, and you don't need to worry about it.
  * 
- * `Content-Disposition` headers come in some pretty weird formats. Examples below. Note
- * that the dash prefix is a list bullet point (not part of the header value).
+ * `Content-Disposition` headers come in some pretty weird formats. Five examples below.
  * @example
- * - inline; filename="simple.jpg"
- * - inline; filename="with spaces.jpg"
- * - attachment; filename*=UTF-8''Na%C3%AFve%20file.txt
- * - attachment; filename=Naïve file.txt
- * - attachment; filename=Na%C3%AFve%20file.txt
+ * ```
+ * inline; filename="simple.jpg"
+ * inline; filename="with spaces.jpg"
+ * attachment; filename*=UTF-8''Na%C3%AFve%20file.txt
+ * attachment; filename=Naïve file.txt
+ * attachment; filename=Na%C3%AFve%20file.txt
+ * ```
+ * 
+ * @param contentDispositionHeader - `Content-Disposition` header.
+ * @returns File name.
  * 
  * @see https://stackoverflow.com/questions/49286221/how-to-get-the-filename-from-a-file-downloaded-using-javascript-fetch-api
  * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition
@@ -51,41 +55,48 @@ const getFileNameFromContentDispositionHeader = (
 };
 
 /**
- * TODO.
+ * Downloads `fetchUrl` and writes it to `toDirectory` + `toFileName`. `async`-compatible.
+ * 
+ * @param parameters - Object with parameters.
+ * @returns Promisified void. Settles when download finishes.
  * 
  * @see https://stackoverflow.com/questions/37614649/how-can-i-download-and-save-a-file-using-the-fetch-api-node-js
  * @see https://stackoverflow.com/questions/11944932/how-to-download-a-file-with-node-js-without-using-third-party-libraries
  */
 export const downloadAsync = async ({
-    fileName,
+    fetchOptions,
+    fetchUrl,
     toDirectory,
-    url,
+    toFileName,
 }: {
-    fileName?: string | ((contentDispositionFileName: ReturnType<typeof getFileNameFromContentDispositionHeader>) => string);
-    toDirectory?: TPathLike,
-    url: Parameters<typeof fetch>[0],
+    /** Options passed to `fetch()` for downloading a resource. */
+    fetchOptions?: Parameters<typeof fetch>[1];
+    /** URL passed to `fetch()` of a downloadable resource. */
+    fetchUrl: Parameters<typeof fetch>[0];
+    /** Destination directory for downloaded resource. */
+    toDirectory: TPathLike,
+    /** Name for downloaded resource. Defaults to `Content-Disposition` file name. */
+    toFileName?: string | ((contentDispositionFileName: ReturnType<typeof getFileNameFromContentDispositionHeader>) => string);
 }): Promise<void> => {
     // Request file.
-    const response = await fetch(url);
+    const response = await fetch(fetchUrl, fetchOptions);
     if (response.body === null) {
         throw new Error('Response body is null.');
     }
     // Determine file name.
     const contentDispositionFileName = getFileNameFromContentDispositionHeader(response.headers.get('Content-Disposition'));
-    const _fileName: string = typeof fileName === 'string'
-        ? fileName
-        : typeof fileName === 'function'
-        ? fileName(contentDispositionFileName)
+    const _toFileName: string = typeof toFileName === 'string'
+        ? toFileName
+        : typeof toFileName === 'function'
+        ? toFileName(contentDispositionFileName)
         : typeof contentDispositionFileName === 'string'
         ? contentDispositionFileName
         : 'default';
-    console.log(_fileName);
-
-    // if (!existsSync(toDirectory)) {
-    //     await mkdir(toDirectory);
-    // }
-    // const fullPath = resolve(String(toDirectory), fileName);
-    // const writeStream = createWriteStream(fullPath);
-
-    // await finished(Readable.fromWeb(response.body as IReadableStream<any>).pipe(writeStream));
+    // Determine path (directory + file name).
+    if (!existsSync(toDirectory)) {
+        await mkdir(toDirectory);
+    }
+    const toPath = resolve(String(toDirectory), _toFileName);
+    // Pipe response body to path.
+    return finished(Readable.fromWeb(response.body as IReadableStream<any>).pipe(createWriteStream(toPath)));
 };
