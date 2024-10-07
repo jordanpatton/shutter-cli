@@ -5,6 +5,8 @@ import { Readable } from 'node:stream';
 import { finished } from 'node:stream/promises';
 import { ReadableStream as IReadableStream } from 'node:stream/web';
 
+const DEFAULT_FILE_NAME = 'untitled';
+
 /**
  * Returns the file name from a `Content-Disposition` header. For CORS requests, the
  * `Access-Control-Expose-Headers` header must be set on the server or else the
@@ -88,7 +90,7 @@ export const downloadAsync = async ({
         ? toFileName(contentDispositionFileName)
         : typeof contentDispositionFileName === 'string'
         ? contentDispositionFileName
-        : 'default';
+        : DEFAULT_FILE_NAME;
     // Determine path (directory + file name).
     if (!existsSync(toDirectory)) {
         await mkdir(toDirectory);
