@@ -61,24 +61,32 @@ const getFileNameFromContentDispositionHeader = (
  * 
  * @see https://stackoverflow.com/questions/37614649/how-can-i-download-and-save-a-file-using-the-fetch-api-node-js
  * @see https://stackoverflow.com/questions/11944932/how-to-download-a-file-with-node-js-without-using-third-party-libraries
+ * @see https://nodejs.org/api/fs.html#filehandlecreatewritestreamoptions
+ * @see https://nodejs.org/api/fs.html#file-system-flags
  */
 export const downloadAsync = async ({
     fetchOptions,
-    fetchUrl,
+    fromUrl,
+    shouldMakeDirectory = false,
     toDirectory,
     toFileName,
+    writeStreamOptions = { flags: 'wx' },
 }: {
-    /** Options passed to `fetch()` for downloading a resource. */
+    /** `options` passed to `fetch(url, options)` for downloading a resource. */
     fetchOptions?: Parameters<typeof fetch>[1];
-    /** URL passed to `fetch()` of a downloadable resource. */
-    fetchUrl: Parameters<typeof fetch>[0];
+    /** URL of a resource to be downloaded. */
+    fromUrl: Parameters<typeof fetch>[0];
+    /** Whether or not to create the destination directory (aka `toDirectory`) if it does not already exist. */
+    shouldMakeDirectory?: boolean;
     /** Destination directory for downloaded resource. */
     toDirectory: TPathLike,
-    /** Name for downloaded resource. Defaults to `Content-Disposition` file name. */
+    /** Name for downloaded resource. Defaults to `Content-Disposition` file name in response headers. */
     toFileName?: string | ((contentDispositionFileName: ReturnType<typeof getFileNameFromContentDispositionHeader>) => string);
+    /** `options` passed to `createWriteStream(path, options)` for writing a file. May include `flags`. */
+    writeStreamOptions?: Parameters<typeof createWriteStream>[1],
 }): Promise<void> => {
     // Request file.
-    const response = await fetch(fetchUrl, fetchOptions);
+    const response = await fetch(fromUrl, fetchOptions);
     if (response.body === null) {
         throw new Error('Response body is null.');
     }
@@ -92,10 +100,11 @@ export const downloadAsync = async ({
         ? contentDispositionFileName
         : DEFAULT_FILE_NAME;
     // Determine path (directory + file name).
-    if (!existsSync(toDirectory)) {
+    if (shouldMakeDirectory && !existsSync(toDirectory)) {
         await mkdir(toDirectory);
     }
     const toPath = resolve(String(toDirectory), _toFileName);
-    // Pipe response body to path.
-    return finished(Readable.fromWeb(response.body as IReadableStream<any>).pipe(createWriteStream(toPath)));
+    // Write file to path.
+    const writeStream = createWriteStream(toPath, writeStreamOptions);
+    return finished(Readable.fromWeb(response.body as IReadableStream<any>).pipe(writeStream));
 };
