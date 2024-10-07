@@ -11,15 +11,12 @@ import { ReadableStream as IReadableStream } from 'node:stream/web';
  * `Content-Disposition` header will not be present in the response. When used with nodejs
  * (not a browser) CORS does not apply, and you don't need to worry about it.
  * 
- * `Content-Disposition` headers come in some pretty weird formats. Five examples below.
- * @example
- * ```
- * inline; filename="simple.jpg"
- * inline; filename="with spaces.jpg"
- * attachment; filename*=UTF-8''Na%C3%AFve%20file.txt
- * attachment; filename=Naïve file.txt
- * attachment; filename=Na%C3%AFve%20file.txt
- * ```
+ * `Content-Disposition` headers come in some pretty weird formats. Examples:
+ * @example inline; filename="simple.jpg"
+ * @example inline; filename="with spaces.jpg"
+ * @example attachment; filename=Naïve file.txt
+ * @example attachment; filename*=UTF-8''Na%C3%AFve%20file.txt
+ * @example attachment; filename=Na%C3%AFve%20file.txt
  * 
  * @param contentDispositionHeader - `Content-Disposition` header.
  * @returns File name.
