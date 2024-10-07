@@ -1,10 +1,13 @@
+import { DEFAULT_FILE_NAME, downloadAsync } from './common/helpers/downloadAsync.js';
 import { getCommandLineParameter } from './common/helpers/getCommandLineParameter.js';
+import { getFileNameParts } from './common/helpers/getFileNameParts.js';
 import { fetchMoments } from './fetchMoments.js';
 import { fetchSkeleton } from './fetchSkeleton.js';
 import { logInToShutterflyViaPuppeteer } from './logInToShutterflyViaPuppeteer.js';
 
 /**
  * Downloads photos from Shutterfly.
+ * 
  * @param parameters - Object with parameters.
  * @returns Promisified void. Settles when workflow is done.
  */
@@ -73,7 +76,22 @@ const downloadPhotosFromShutterfly = async ({
 
     console.log('\nDownloading photos...');
     console.group();
-    console.log(JSON.stringify(moments, null, 4));
+    moments.forEach(async (v, i) => {
+        console.log(`Downloading ${i + 1} of ${moments.length} (moment ${v.uid})...`);
+        await downloadAsync({
+            fromUrl: `https://io.thislife.com/download?accessToken=${cognitoIdToken}&momentId=${v.uid}&source=library`,
+            toDirectory: 'ignore',
+            toFileName: (contentDispositionFileName = DEFAULT_FILE_NAME) => {
+                // Convert 1234567890 => 1234567890000 => '2009-02-13T23:31:30.000Z' => '2009-02-13 23_31_30'.
+                const momentDate = new Date(parseInt(v.moment_date, 10) * 1000);
+                const dateString = momentDate.toISOString().replace(/T/g, ' ').replace(/:/g, '_').split('.')[0];
+                // Separate base name from extension.
+                const { baseName, extension } = getFileNameParts(contentDispositionFileName);
+                // Combine. Example: '2009-02-13 23_31_30 vacation (1836271517531475).jpg'
+                return `${dateString} ${baseName} (${v.uid})${typeof extension === 'string' ? `.${extension}` : ''}`;
+            },
+        });
+    });
     console.groupEnd();
     console.log('...done!');
 

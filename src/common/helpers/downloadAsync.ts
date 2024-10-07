@@ -5,7 +5,7 @@ import { Readable } from 'node:stream';
 import { finished } from 'node:stream/promises';
 import { ReadableStream as IReadableStream } from 'node:stream/web';
 
-const DEFAULT_FILE_NAME = 'untitled';
+export const DEFAULT_FILE_NAME = 'untitled';
 
 /**
  * Returns the file name from a `Content-Disposition` header. For CORS requests, the
