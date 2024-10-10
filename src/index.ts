@@ -4,7 +4,7 @@ import { getCommandLineParameter } from './common/helpers/getCommandLineParamete
 import { downloadPhotos } from './downloadPhotos.js';
 import { fetchMoments } from './fetchMoments.js';
 import { fetchSkeleton } from './fetchSkeleton.js';
-import { logInToShutterflyViaPuppeteer } from './logInToShutterflyViaPuppeteer.js';
+import { logIn } from './logIn.js';
 
 /** `downloadPhotosFromShutterfly` parameters. */
 interface IDownloadPhotosFromShutterflyParameters {
@@ -122,12 +122,13 @@ const downloadPhotosFromShutterfly = async ({
         console.log('Skipping Shutterfly login and using given Cognito idToken.');
     } else {
         console.log('Logging in to Shutterfly...');
-        const puppeteerCognitoIdToken = await logInToShutterflyViaPuppeteer();
-        if (typeof puppeteerCognitoIdToken !== 'string' || !puppeteerCognitoIdToken.length) {
+        const newCognitoIdToken = await logIn();
+        if (typeof newCognitoIdToken === 'string' && newCognitoIdToken.length) {
+            cognitoIdToken = newCognitoIdToken;
+            console.log(`Using Cognito idToken from Shutterfly:\n${newCognitoIdToken}`);
+        } else {
             throw new Error('ERROR: Failed to log in to Shutterfly.');
         }
-        cognitoIdToken = puppeteerCognitoIdToken;
-        console.log(`Using Cognito idToken from Shutterfly:\n${puppeteerCognitoIdToken}`);
     }
     console.groupEnd();
     console.log('...done!');

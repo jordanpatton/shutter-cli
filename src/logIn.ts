@@ -16,7 +16,7 @@ import { repeatAsync } from './common/helpers/repeatAsync.js';
  * @returns Promisified identification token from Amazon Cognito authentication service.
  *          Settles when puppeteer script is done.
  */
-export const logInToShutterflyViaPuppeteer = async (): Promise<string | undefined> => {
+export const logIn = async (): Promise<string | undefined> => {
     /** Cognito idToken. */
     let cognitoIdToken: string | undefined;
     /** Whether or not the puppeteer script has completed its operations. */
