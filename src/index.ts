@@ -176,5 +176,4 @@ const downloadPhotosFromShutterfly = async ({
     return;
 };
 
-// TODO: add downloadToDirectory as command-line parameter
 downloadPhotosFromShutterfly(parseDownloadPhotosFromShutterflyParameters());

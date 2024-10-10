@@ -1,4 +1,3 @@
-// TODO: move not-so-common constants to their only place of use
 export const BROWSER_INITIAL_HEIGHT_PIXELS = 768;
 export const BROWSER_INITIAL_WIDTH_PIXELS = 1024;
 export const COGNITO_COOKIE_NAME_ID_TOKEN_POSTFIX = '.idToken';
