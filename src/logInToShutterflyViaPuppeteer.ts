@@ -12,6 +12,7 @@ import { repeatAsync } from './common/helpers/repeatAsync.js';
 /**
  * Logs in to Shutterfly. We use puppeteer here because we don't want to fight with
  * recaptcha and any other anti-bot systems that would make things prohbitively difficult.
+ * 
  * @returns Promisified identification token from Amazon Cognito authentication service.
  *          Settles when puppeteer script is done.
  */

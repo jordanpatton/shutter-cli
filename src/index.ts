@@ -1,9 +1,5 @@
-import { THISLIFE_DOWNLOAD_URL } from './common/constants.js';
-import { DEFAULT_FILE_NAME, downloadAsync } from './common/helpers/downloadAsync.js';
-import { generateRandomInteger } from './common/helpers/generateRandomInteger.js';
 import { getCommandLineParameter } from './common/helpers/getCommandLineParameter.js';
-import { getFileNameParts } from './common/helpers/getFileNameParts.js';
-import { sleepAsync } from './common/helpers/sleepAsync.js';
+import { downloadPhotos } from './downloadPhotos.js';
 import { fetchMoments } from './fetchMoments.js';
 import { fetchSkeleton } from './fetchSkeleton.js';
 import { logInToShutterflyViaPuppeteer } from './logInToShutterflyViaPuppeteer.js';
@@ -97,8 +93,8 @@ const parseDownloadPhotosFromShutterflyParameters = (): IDownloadPhotosFromShutt
  */
 const downloadPhotosFromShutterfly = async ({
     cognitoIdToken: givenCognitoIdToken,
-    downloadDelayFixedMilliseconds = 2000,
-    downloadDelayJitterMilliseconds = 1000,
+    downloadDelayFixedMilliseconds,
+    downloadDelayJitterMilliseconds,
     endTimeUnixSeconds: givenEndTimeUnixSeconds,
     startTimeUnixSeconds: givenStartTimeUnixSeconds,
 }: IDownloadPhotosFromShutterflyParameters): Promise<void> => {
@@ -157,36 +153,12 @@ const downloadPhotosFromShutterfly = async ({
 
     console.log(`\nDownloading ${moments.length} photos...`);
     console.group();
-    // Download files in serial with interstitial delay and jitter to avoid overwhelming the server.
-    // @see https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
-    for (let i = 0, j = moments.length; i < j; i++) {
-        if (i > 0) {
-            const delayMilliseconds = downloadDelayFixedMilliseconds + generateRandomInteger(0, downloadDelayJitterMilliseconds);
-            process.stdout.write(`Waiting ${delayMilliseconds} milliseconds...`);
-            await sleepAsync(delayMilliseconds);
-            process.stdout.clearLine(0);
-            process.stdout.cursorTo(0);
-        }
-        console.log(`Downloading photo ${i + 1} of ${moments.length} (moment ${moments[i].uid})...`);
-        await downloadAsync({
-            fromUrl: `${THISLIFE_DOWNLOAD_URL}?accessToken=${encodeURIComponent(cognitoIdToken)}&momentId=${encodeURIComponent(moments[i].uid)}&source=library`,
-            toDirectory: 'ignore', // TODO: abstract to command-line parameter
-            toFileName: (contentDispositionFileName = DEFAULT_FILE_NAME) => {
-                // Convert 1234567890 => 1234567890000 => '2009-02-13T23:31:30.000Z' => '2009-02-13 23_31_30'.
-                const momentDate = new Date(parseInt(moments[i].moment_date, 10) * 1000);
-                const dateString = momentDate.toISOString().replace(/T/g, ' ').replace(/:/g, '_').split('.')[0];
-                // Separate base name from extension.
-                const { baseName, extension } = getFileNameParts(contentDispositionFileName);
-                // Combine. Example: '2009-02-13 23_31_30 vacation (1836271517531475).jpg'
-                return `${dateString} ${baseName} (${moments[i].uid})${typeof extension === 'string' ? `.${extension}` : ''}`;
-            },
-        });
-    }
+    await downloadPhotos(cognitoIdToken, moments, undefined, downloadDelayFixedMilliseconds, downloadDelayJitterMilliseconds);
     console.groupEnd();
     console.log('...done!');
 
     return;
 };
 
-// TODO: add download path as command-line parameter
+// TODO: add downloadToDirectory as command-line parameter
 downloadPhotosFromShutterfly(parseDownloadPhotosFromShutterflyParameters());

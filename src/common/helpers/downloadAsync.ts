@@ -5,6 +5,22 @@ import { Readable } from 'node:stream';
 import { finished } from 'node:stream/promises';
 import { ReadableStream as IReadableStream } from 'node:stream/web';
 
+/** `downloadAsync` parameters. */
+export interface IDownloadAsyncParameters {
+    /** `options` passed to `fetch(url, options)` for downloading a resource. */
+    fetchOptions?: Parameters<typeof fetch>[1];
+    /** URL of a resource to be downloaded. */
+    fromUrl: Parameters<typeof fetch>[0];
+    /** Whether or not to create the destination directory (aka `toDirectory`) if it does not already exist. */
+    shouldMakeDirectory?: boolean;
+    /** Destination directory for downloaded resource. */
+    toDirectory: TPathLike,
+    /** Name for downloaded resource. Defaults to `Content-Disposition` file name in response headers. */
+    toFileName?: string | ((contentDispositionFileName: ReturnType<typeof getFileNameFromContentDispositionHeader>) => string);
+    /** `options` passed to `createWriteStream(path, options)` for writing a file. May include `flags`. */
+    writeStreamOptions?: Parameters<typeof createWriteStream>[1],
+}
+
 export const DEFAULT_FILE_NAME = 'untitled';
 
 /**
@@ -56,7 +72,7 @@ const getFileNameFromContentDispositionHeader = (
 /**
  * Downloads `fetchUrl` and writes it to `toDirectory` + `toFileName`. `async`-compatible.
  * 
- * @param parameters - Object with parameters.
+ * @param parameters - Parameters.
  * @returns Promisified void. Settles when download finishes.
  * 
  * @see https://stackoverflow.com/questions/37614649/how-can-i-download-and-save-a-file-using-the-fetch-api-node-js
@@ -71,20 +87,7 @@ export const downloadAsync = async ({
     toDirectory,
     toFileName,
     writeStreamOptions = { flags: 'wx' },
-}: {
-    /** `options` passed to `fetch(url, options)` for downloading a resource. */
-    fetchOptions?: Parameters<typeof fetch>[1];
-    /** URL of a resource to be downloaded. */
-    fromUrl: Parameters<typeof fetch>[0];
-    /** Whether or not to create the destination directory (aka `toDirectory`) if it does not already exist. */
-    shouldMakeDirectory?: boolean;
-    /** Destination directory for downloaded resource. */
-    toDirectory: TPathLike,
-    /** Name for downloaded resource. Defaults to `Content-Disposition` file name in response headers. */
-    toFileName?: string | ((contentDispositionFileName: ReturnType<typeof getFileNameFromContentDispositionHeader>) => string);
-    /** `options` passed to `createWriteStream(path, options)` for writing a file. May include `flags`. */
-    writeStreamOptions?: Parameters<typeof createWriteStream>[1],
-}): Promise<void> => {
+}: IDownloadAsyncParameters): Promise<void> => {
     // Request file.
     const response = await fetch(fromUrl, fetchOptions);
     if (response.body === null) {

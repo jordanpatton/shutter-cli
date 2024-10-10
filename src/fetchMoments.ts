@@ -1,28 +1,6 @@
 import { THISLIFE_JSON_URL } from './common/constants.js';
-import { IThisLifeApiResponseJson } from './common/types.js';
+import { IMoment, IThisLifeApiResponseJson } from './common/types.js';
 
-/** Moment object from ThisLife API. */
-interface IMoment {
-    /** Stringified `number`. Seconds since Unix epoch. */
-    created: string;
-    /** Stringified `number`. Seconds since Unix epoch. */
-    effects_modified_date: string;
-    /** Technically optional if you disable encryption, but we intentionally ignore that fact. */
-    encrypted_id: string;
-    /** Stringified `number`. */
-    life_uid: string;
-    /** Stringified `number`. Seconds since Unix epoch. */
-    moment_date: string;
-    /** Known good values: `'image'`. */
-    moment_type: string;
-    /** Pixels. */
-    orig_height: number;
-    /** Pixels. */
-    orig_width: number;
-    rating: number;
-    /** Stringified `number`. */
-    uid: string;
-}
 /** Payload format for successful request to `getPaginatedMoments`. */
 interface IGetPaginatedMomentsResponseJsonSuccessPayload {
     /** Can also be a hexadecimal-encoded string, but we intentionally ignore that fact. */
@@ -52,6 +30,7 @@ type TGetPaginatedMomentsResponseJson = IThisLifeApiResponseJson<IGetPaginatedMo
  *   changes OR error out.
  * - **DEDUPLICATION:** After completing multiple pagination requests, you should
  *   deduplicate the accumulated moments by `uid`.
+ * 
  * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
  * @param startTimeUnixSeconds - Start time in seconds since Unix epoch. Should remain constant across requests.
  * @param endTimeUnixSeconds - End time in seconds since Unix epoch. Should decrease with each request.
@@ -89,10 +68,13 @@ const fetchPaginatedMomentsViaApi = async (
 
 /**
  * Fetches all moments for a given time range.
+ * 
  * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
  * @param startTimeUnixSeconds - Start of time range in seconds since Unix epoch.
  * @param endTimeUnixSeconds - End of time range in seconds since Unix epoch.
- * @returns Promisified array of moments.
+ * @returns Promisified array of moments. Settles when data is ready.
+ * 
+ * @see https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
  */
 export const fetchMoments = async (
     cognitoIdToken: string,
