@@ -1,5 +1,5 @@
-import { THISLIFE_JSON_URL } from './common/constants.js';
-import { IMoment, IThisLifeApiResponseJson } from './common/types.js';
+import { THISLIFE_JSON_URL } from '../../common/constants.js';
+import { IMoment, IThisLifeApiResponseJson } from '../../common/types.js';
 
 /** Payload format for successful request to `getPaginatedMoments`. */
 interface IGetPaginatedMomentsResponseJsonSuccessPayload {

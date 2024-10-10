@@ -1,9 +1,9 @@
-import { THISLIFE_DOWNLOAD_URL } from './common/constants.js';
-import { DEFAULT_FILE_NAME, downloadAsync, IDownloadAsyncParameters } from './common/helpers/downloadAsync.js';
-import { generateRandomInteger } from './common/helpers/generateRandomInteger.js';
-import { getFileNameParts } from './common/helpers/getFileNameParts.js';
-import { sleepAsync } from './common/helpers/sleepAsync.js';
-import { IMoment } from './common/types.js';
+import { THISLIFE_DOWNLOAD_URL } from '../../common/constants.js';
+import { DEFAULT_FILE_NAME, downloadAsync, IDownloadAsyncParameters } from '../../common/helpers/downloadAsync.js';
+import { generateRandomInteger } from '../../common/helpers/generateRandomInteger.js';
+import { getFileNameParts } from '../../common/helpers/getFileNameParts.js';
+import { sleepAsync } from '../../common/helpers/sleepAsync.js';
+import { IMoment } from '../../common/types.js';
 
 /**
  * Downloads given list of photos from Shutterfly. Downloads in serial with interstitial

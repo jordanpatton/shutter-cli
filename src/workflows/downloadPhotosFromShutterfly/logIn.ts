@@ -6,8 +6,8 @@ import {
     COGNITO_COOKIE_NAME_ID_TOKEN_POSTFIX,
     COGNITO_COOKIE_NAME_PREFIX,
     SHUTTERFLY_LOGIN_URL_WITH_COOKIES_REDIRECT,
-} from './common/constants.js';
-import { repeatAsync } from './common/helpers/repeatAsync.js';
+} from '../../common/constants.js';
+import { repeatAsync } from '../../common/helpers/repeatAsync.js';
 
 /**
  * Logs in to Shutterfly. We use puppeteer here because we don't want to fight with
