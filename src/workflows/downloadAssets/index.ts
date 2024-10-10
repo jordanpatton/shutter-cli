@@ -1,20 +1,20 @@
 import { existsSync } from 'node:fs';
 
 import { getCommandLineParameter } from '../../common/helpers/getCommandLineParameter.js';
-import { downloadPhotos } from './downloadPhotos.js';
+import { downloadAssetsForMoments } from './downloadAssetsForMoments.js';
 import { fetchMoments } from './fetchMoments.js';
 import { fetchSkeleton } from './fetchSkeleton.js';
 import { logIn } from './logIn.js';
 
-/** `downloadPhotosFromShutterfly` parameters. */
-interface IDownloadPhotosFromShutterflyParameters {
+/** `downloadAssets` parameters. */
+interface IDownloadAssetsParameters {
     /** Identification token from Amazon Cognito authentication service. */
     cognitoIdToken?: string;
     /** Fixed delay between downloads in integer milliseconds. */
     downloadDelayFixedMilliseconds?: number;
     /** Jittered delay between downloads in integer milliseconds. */
     downloadDelayJitterMilliseconds?: number;
-    /** Destination directory for downloaded photos. */
+    /** Destination directory for downloaded assets. */
     downloadToDirectory?: string;
     /** End of time range in seconds since Unix epoch. */
     endTimeUnixSeconds?: number;
@@ -23,15 +23,15 @@ interface IDownloadPhotosFromShutterflyParameters {
 }
 
 /**
- * Parses `downloadPhotosFromShutterfly` parameters.
+ * Parses `downloadAssets` parameters.
  * 
  * @returns Parsed parameters.
  * 
  * @see https://stackoverflow.com/questions/14636536/how-to-check-if-a-variable-is-an-integer-in-javascript
  * @see https://stackoverflow.com/questions/1353684/detecting-an-invalid-date-date-instance-in-javascript
  */
-export const parseDownloadPhotosFromShutterflyParameters = (): IDownloadPhotosFromShutterflyParameters => {
-    const parsed: IDownloadPhotosFromShutterflyParameters = {};
+export const parseDownloadAssetsParameters = (): IDownloadAssetsParameters => {
+    const parsed: IDownloadAssetsParameters = {};
     // cognitoIdToken (optional): non-empty string
     const cognitoIdToken = getCommandLineParameter('--cognitoIdToken').value;
     if (typeof cognitoIdToken === 'string') {
@@ -101,19 +101,19 @@ export const parseDownloadPhotosFromShutterflyParameters = (): IDownloadPhotosFr
 };
 
 /**
- * Downloads photos from Shutterfly.
+ * Downloads assets from Shutterfly.
  * 
  * @param parameters - Parameters.
  * @returns Promisified void. Settles when workflow is done.
  */
-export const downloadPhotosFromShutterfly = async ({
+export const downloadAssets = async ({
     cognitoIdToken: givenCognitoIdToken,
     downloadDelayFixedMilliseconds,
     downloadDelayJitterMilliseconds,
     downloadToDirectory,
     endTimeUnixSeconds: givenEndTimeUnixSeconds,
     startTimeUnixSeconds: givenStartTimeUnixSeconds,
-}: IDownloadPhotosFromShutterflyParameters): Promise<void> => {
+}: IDownloadAssetsParameters): Promise<void> => {
     console.log('\nAuthenticating...');
     console.group();
     let cognitoIdToken: string;
@@ -162,15 +162,21 @@ export const downloadPhotosFromShutterfly = async ({
     console.groupEnd();
     console.log('...done!');
 
-    console.log('\nBuilding list of downloadable photos...');
+    console.log('\nBuilding list of downloadable assets...');
     console.group();
     const moments = await fetchMoments(cognitoIdToken, startTimeUnixSeconds, endTimeUnixSeconds);
     console.groupEnd();
     console.log('...done!');
 
-    console.log(`\nDownloading ${moments.length} photos...`);
+    console.log(`\nDownloading ${moments.length} assets...`);
     console.group();
-    await downloadPhotos(cognitoIdToken, moments, downloadToDirectory, downloadDelayFixedMilliseconds, downloadDelayJitterMilliseconds);
+    await downloadAssetsForMoments(
+        cognitoIdToken,
+        moments,
+        downloadToDirectory,
+        downloadDelayFixedMilliseconds,
+        downloadDelayJitterMilliseconds
+    );
     console.groupEnd();
     console.log('...done!');
 

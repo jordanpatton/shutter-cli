@@ -6,19 +6,19 @@ import { sleepAsync } from '../../common/helpers/sleepAsync.js';
 import { IMoment } from '../../common/types.js';
 
 /**
- * Downloads given list of photos from Shutterfly. Downloads in serial with interstitial
- * delay and jitter to avoid overwhelming the server.
+ * Downloads assets corresponding to given list of moments. Downloads in serial with
+ * interstitial delay and jitter to avoid overwhelming the server.
  * 
  * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
  * @param moments - Shutterfly moments.
- * @param toDirectory - Destination directory for downloaded photos.
+ * @param toDirectory - Destination directory for downloaded assets.
  * @param delayFixedMilliseconds - Fixed delay between downloads in integer milliseconds.
  * @param delayJitterMilliseconds - Jittered delay between downloads in integer milliseconds.
  * @returns Promisified void. Settles when all downloads are finished.
  * 
  * @see https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
  */
-export const downloadPhotos = async (
+export const downloadAssetsForMoments = async (
     cognitoIdToken: string,
     moments: IMoment[],
     toDirectory: IDownloadAsyncParameters['toDirectory'] = '.',
@@ -33,7 +33,7 @@ export const downloadPhotos = async (
             process.stdout.clearLine(0);
             process.stdout.cursorTo(0);
         }
-        console.log(`Downloading photo ${i + 1} of ${moments.length} (moment ${moments[i].uid})...`);
+        console.log(`Downloading asset ${i + 1} of ${moments.length} (moment ${moments[i].uid})...`);
         await downloadAsync({
             fromUrl: `${THISLIFE_DOWNLOAD_URL}?accessToken=${encodeURIComponent(cognitoIdToken)}&momentId=${encodeURIComponent(moments[i].uid)}&source=library`,
             toDirectory,

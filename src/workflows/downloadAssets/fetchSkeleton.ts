@@ -16,8 +16,8 @@ interface IGetSkeletonResponseJsonSuccessPayload {
 type TGetSkeletonResponseJson = IThisLifeApiResponseJson<IGetSkeletonResponseJsonSuccessPayload>;
 
 /**
- * Fetches basic skeleton that Shutterfly uses to construct the photo library page and
- * perform various other requests.
+ * Fetches basic skeleton that Shutterfly uses to construct the library page and perform
+ * various other requests.
  * 
  * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
  * @returns Promisified response payload. Settles when payload is ready.

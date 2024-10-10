@@ -1,6 +1,3 @@
-import {
-    downloadPhotosFromShutterfly,
-    parseDownloadPhotosFromShutterflyParameters,
-} from './workflows/downloadPhotosFromShutterfly/index.js';
+import { downloadAssets, parseDownloadAssetsParameters } from './workflows/downloadAssets/index.js';
 
-downloadPhotosFromShutterfly(parseDownloadPhotosFromShutterflyParameters());
+downloadAssets(parseDownloadAssetsParameters());
