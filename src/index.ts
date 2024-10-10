@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+
 import { getCommandLineParameter } from './common/helpers/getCommandLineParameter.js';
 import { downloadPhotos } from './downloadPhotos.js';
 import { fetchMoments } from './fetchMoments.js';
@@ -62,14 +64,15 @@ const parseDownloadPhotosFromShutterflyParameters = (): IDownloadPhotosFromShutt
             throw new TypeError('downloadDelayJitterMilliseconds (optional) must be a positive integer.');
         }
     }
-    // downloadToDirectory (optional): non-empty string
+    // downloadToDirectory (optional): existing directory
     const downloadToDirectory = getCommandLineParameter('--downloadToDirectory').value;
     if (typeof downloadToDirectory === 'string') {
-        if (downloadToDirectory.length) {
+        // TODO: Check that the path points to a directory (not a file).
+        if (existsSync(downloadToDirectory)) {
             parsed.downloadToDirectory = downloadToDirectory;
             console.log('Parsed downloadToDirectory from command line.');
         } else {
-            throw new TypeError('downloadToDirectory (optional) must be a non-empty string.');
+            throw new TypeError('downloadToDirectory (optional) must be an existing directory.');
         }
     }
     // endTime (optional): new-Date-able expression
