@@ -12,6 +12,8 @@ interface IDownloadPhotosFromShutterflyParameters {
     downloadDelayFixedMilliseconds?: number;
     /** Jittered delay between downloads in integer milliseconds. */
     downloadDelayJitterMilliseconds?: number;
+    /** Destination directory for downloaded photos. */
+    downloadToDirectory?: string;
     /** End of time range in seconds since Unix epoch. */
     endTimeUnixSeconds?: number;
     /** Start of time range in seconds since Unix epoch. */
@@ -60,6 +62,16 @@ const parseDownloadPhotosFromShutterflyParameters = (): IDownloadPhotosFromShutt
             throw new TypeError('downloadDelayJitterMilliseconds (optional) must be a positive integer.');
         }
     }
+    // downloadToDirectory (optional): non-empty string
+    const downloadToDirectory = getCommandLineParameter('--downloadToDirectory').value;
+    if (typeof downloadToDirectory === 'string') {
+        if (downloadToDirectory.length) {
+            parsed.downloadToDirectory = downloadToDirectory;
+            console.log('Parsed downloadToDirectory from command line.');
+        } else {
+            throw new TypeError('downloadToDirectory (optional) must be a non-empty string.');
+        }
+    }
     // endTime (optional): new-Date-able expression
     const endTime = getCommandLineParameter('--endTime').value;
     if (typeof endTime === 'string') {
@@ -95,6 +107,7 @@ const downloadPhotosFromShutterfly = async ({
     cognitoIdToken: givenCognitoIdToken,
     downloadDelayFixedMilliseconds,
     downloadDelayJitterMilliseconds,
+    downloadToDirectory,
     endTimeUnixSeconds: givenEndTimeUnixSeconds,
     startTimeUnixSeconds: givenStartTimeUnixSeconds,
 }: IDownloadPhotosFromShutterflyParameters): Promise<void> => {
@@ -153,7 +166,7 @@ const downloadPhotosFromShutterfly = async ({
 
     console.log(`\nDownloading ${moments.length} photos...`);
     console.group();
-    await downloadPhotos(cognitoIdToken, moments, undefined, downloadDelayFixedMilliseconds, downloadDelayJitterMilliseconds);
+    await downloadPhotos(cognitoIdToken, moments, downloadToDirectory, downloadDelayFixedMilliseconds, downloadDelayJitterMilliseconds);
     console.groupEnd();
     console.log('...done!');
 
