@@ -1,5 +1,5 @@
 import { getCommandLineParameter } from './common/helpers/getCommandLineParameter.js';
-import { downloadAssets, parseDownloadAssetsParameters } from './workflows/downloadAssets/index.js';
+import { downloadAssets, parseDownloadAssetsParameters } from './workflows/downloadAssets.js';
 
 /**
  * Main entrypoint for this program.

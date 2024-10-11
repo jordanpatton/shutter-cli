@@ -1,13 +1,14 @@
 import { launch } from 'puppeteer';
 
-import {
-    BROWSER_INITIAL_HEIGHT_PIXELS,
-    BROWSER_INITIAL_WIDTH_PIXELS,
-    COGNITO_COOKIE_NAME_ID_TOKEN_POSTFIX,
-    COGNITO_COOKIE_NAME_PREFIX,
-    SHUTTERFLY_LOGIN_URL_WITH_COOKIES_REDIRECT,
-} from '../common/constants.js';
 import { repeatAsync } from '../common/helpers/repeatAsync.js';
+
+const BROWSER_INITIAL_HEIGHT_PIXELS = 768;
+const BROWSER_INITIAL_WIDTH_PIXELS = 1024;
+const COGNITO_COOKIE_NAME_ID_TOKEN_POSTFIX = '.idToken';
+const COGNITO_COOKIE_NAME_PREFIX = 'CognitoIdentityServiceProvider.';
+const SHUTTERFLY_COOKIES_URL = 'https://accounts.shutterfly.com/cookies.html';
+const SHUTTERFLY_LOGIN_URL = 'https://accounts.shutterfly.com';
+const SHUTTERFLY_LOGIN_URL_WITH_COOKIES_REDIRECT = `${SHUTTERFLY_LOGIN_URL}/?redirectUri=${encodeURIComponent(SHUTTERFLY_COOKIES_URL)}`;
 
 /**
  * Logs in to Shutterfly. We use puppeteer here because we don't want to fight with

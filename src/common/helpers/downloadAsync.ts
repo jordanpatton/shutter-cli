@@ -21,7 +21,8 @@ export interface IDownloadAsyncParameters {
     writeStreamOptions?: Parameters<typeof createWriteStream>[1],
 }
 
-export const DEFAULT_FILE_NAME = 'untitled';
+/** Default file name (i.e., base name + extension) for a newly-downloaded file. */
+export const DEFAULT_NEW_FILE_NAME = 'untitled';
 
 /**
  * Returns the file name from a `Content-Disposition` header. For CORS requests, the
@@ -101,7 +102,7 @@ export const downloadAsync = async ({
         ? toFileName(contentDispositionFileName)
         : typeof contentDispositionFileName === 'string'
         ? contentDispositionFileName
-        : DEFAULT_FILE_NAME;
+        : DEFAULT_NEW_FILE_NAME;
     // Determine path (directory + file name).
     if (shouldMakeDirectory && !existsSync(toDirectory)) {
         await mkdir(toDirectory);

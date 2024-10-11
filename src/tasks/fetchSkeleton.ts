@@ -1,5 +1,5 @@
-import { ONE_DAY_IN_MILLISECONDS, THISLIFE_JSON_URL } from '../common/constants.js';
-import { IThisLifeApiResponseJson } from '../common/types.js';
+import { THISLIFE_JSON_URL } from './constants.js';
+import { IThisLifeApiResponseJson } from './types.js';
 
 /** Payload format for successful request to `getSkeleton`. */
 interface IGetSkeletonResponseJsonSuccessPayload {
@@ -14,6 +14,9 @@ interface IGetSkeletonResponseJsonSuccessPayload {
 }
 /** Response json format for `getSkeleton`. */
 type TGetSkeletonResponseJson = IThisLifeApiResponseJson<IGetSkeletonResponseJsonSuccessPayload>;
+
+/** One day in milliseconds. */
+const ONE_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
 
 /**
  * Fetches basic skeleton that Shutterfly uses to construct the library page and perform

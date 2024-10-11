@@ -1,9 +1,10 @@
-import { THISLIFE_DOWNLOAD_URL } from '../common/constants.js';
-import { DEFAULT_FILE_NAME, downloadAsync, IDownloadAsyncParameters } from '../common/helpers/downloadAsync.js';
+import { DEFAULT_NEW_FILE_NAME, downloadAsync, IDownloadAsyncParameters } from '../common/helpers/downloadAsync.js';
 import { generateRandomInteger } from '../common/helpers/generateRandomInteger.js';
 import { getFileNameParts } from '../common/helpers/getFileNameParts.js';
 import { sleepAsync } from '../common/helpers/sleepAsync.js';
-import { IMoment } from '../common/types.js';
+import { IMoment } from './types.js';
+
+const THISLIFE_DOWNLOAD_URL = 'https://io.thislife.com/download';
 
 /**
  * Downloads assets corresponding to given list of moments in serial (i.e., no parallel
@@ -37,7 +38,7 @@ export const downloadAssetsSerial = async (
         await downloadAsync({
             fromUrl: `${THISLIFE_DOWNLOAD_URL}?accessToken=${encodeURIComponent(cognitoIdToken)}&momentId=${encodeURIComponent(moments[i].uid)}&source=library`,
             toDirectory,
-            toFileName: (contentDispositionFileName = DEFAULT_FILE_NAME) => {
+            toFileName: (contentDispositionFileName = DEFAULT_NEW_FILE_NAME) => {
                 // Convert 1234567890 => 1234567890000 => '2009-02-13T23:31:30.000Z' => '2009-02-13 23_31_30'.
                 const momentDate = new Date(parseInt(moments[i].moment_date, 10) * 1000);
                 const dateString = momentDate.toISOString().replace(/T/g, ' ').replace(/:/g, '_').split('.')[0];
