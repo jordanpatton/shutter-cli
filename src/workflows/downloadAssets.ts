@@ -1,10 +1,10 @@
 import { existsSync } from 'node:fs';
 
-import { getCommandLineParameter } from '../../common/helpers/getCommandLineParameter.js';
-import { downloadAssetsForMoments } from './downloadAssetsForMoments.js';
-import { fetchMoments } from './fetchMoments.js';
-import { fetchSkeleton } from './fetchSkeleton.js';
-import { logIn } from './logIn.js';
+import { getCommandLineParameter } from '../common/helpers/getCommandLineParameter.js';
+import { downloadAssetsSerial } from '../tasks/downloadAssetsSerial.js';
+import { fetchMoments } from '../tasks/fetchMoments.js';
+import { fetchSkeleton } from '../tasks/fetchSkeleton.js';
+import { logIn } from '../tasks/logIn.js';
 
 /** `downloadAssets` parameters. */
 interface IDownloadAssetsParameters {
@@ -170,7 +170,7 @@ export const downloadAssets = async ({
 
     console.log(`\nDownloading ${moments.length} assets...`);
     console.group();
-    await downloadAssetsForMoments(
+    await downloadAssetsSerial(
         cognitoIdToken,
         moments,
         downloadToDirectory,

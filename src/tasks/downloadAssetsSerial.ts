@@ -1,13 +1,13 @@
-import { THISLIFE_DOWNLOAD_URL } from '../../common/constants.js';
-import { DEFAULT_FILE_NAME, downloadAsync, IDownloadAsyncParameters } from '../../common/helpers/downloadAsync.js';
-import { generateRandomInteger } from '../../common/helpers/generateRandomInteger.js';
-import { getFileNameParts } from '../../common/helpers/getFileNameParts.js';
-import { sleepAsync } from '../../common/helpers/sleepAsync.js';
-import { IMoment } from '../../common/types.js';
+import { THISLIFE_DOWNLOAD_URL } from '../common/constants.js';
+import { DEFAULT_FILE_NAME, downloadAsync, IDownloadAsyncParameters } from '../common/helpers/downloadAsync.js';
+import { generateRandomInteger } from '../common/helpers/generateRandomInteger.js';
+import { getFileNameParts } from '../common/helpers/getFileNameParts.js';
+import { sleepAsync } from '../common/helpers/sleepAsync.js';
+import { IMoment } from '../common/types.js';
 
 /**
- * Downloads assets corresponding to given list of moments. Downloads in serial with
- * interstitial delay and jitter to avoid overwhelming the server.
+ * Downloads assets corresponding to given list of moments in serial (i.e., no parallel
+ * downloads) with interstitial delay and jitter to avoid overwhelming the server.
  * 
  * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
  * @param moments - Shutterfly moments.
@@ -18,7 +18,7 @@ import { IMoment } from '../../common/types.js';
  * 
  * @see https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
  */
-export const downloadAssetsForMoments = async (
+export const downloadAssetsSerial = async (
     cognitoIdToken: string,
     moments: IMoment[],
     toDirectory: IDownloadAsyncParameters['toDirectory'] = '.',

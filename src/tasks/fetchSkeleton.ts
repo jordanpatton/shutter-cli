@@ -1,5 +1,5 @@
-import { ONE_DAY_IN_MILLISECONDS, THISLIFE_JSON_URL } from '../../common/constants.js';
-import { IThisLifeApiResponseJson } from '../../common/types.js';
+import { ONE_DAY_IN_MILLISECONDS, THISLIFE_JSON_URL } from '../common/constants.js';
+import { IThisLifeApiResponseJson } from '../common/types.js';
 
 /** Payload format for successful request to `getSkeleton`. */
 interface IGetSkeletonResponseJsonSuccessPayload {
