@@ -2,7 +2,7 @@
 Unofficial command-line interface for [Shutterfly](https://www.shutterfly.com).
 
 ## Getting Started
-Required: [Node.js (latest LTS)](https://nodejs.org/en/download/package-manager)
+Requires [Node.js (latest LTS)](https://nodejs.org/en/download/package-manager).
 ```shell
 # Clone project OR download archive from GitHub.
 git clone https://github.com/jordanpatton/shutter-cli.git
