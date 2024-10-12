@@ -1,4 +1,4 @@
-import { getCommandLineParameter } from './common/helpers/getCommandLineParameter.js';
+import { getCommandLineParameter } from './utilities/getCommandLineParameter.js';
 import { downloadAssets, parseDownloadAssetsParameters } from './workflows/downloadAssets.js';
 
 /**

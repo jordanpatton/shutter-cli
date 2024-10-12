@@ -1,10 +1,10 @@
 import { existsSync } from 'node:fs';
 
-import { getCommandLineParameter } from '../common/helpers/getCommandLineParameter.js';
 import { downloadAssetsSerial } from '../tasks/downloadAssetsSerial.js';
 import { fetchMoments } from '../tasks/fetchMoments.js';
 import { fetchSkeleton } from '../tasks/fetchSkeleton.js';
 import { logIn } from '../tasks/logIn.js';
+import { getCommandLineParameter } from '../utilities/getCommandLineParameter.js';
 
 /** `downloadAssets` parameters. */
 interface IDownloadAssetsParameters {
