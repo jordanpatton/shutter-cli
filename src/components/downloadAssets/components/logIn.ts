@@ -1,6 +1,6 @@
 import { launch } from 'puppeteer';
 
-import { repeatAsync } from '../utilities/repeatAsync.js';
+import { repeatAsync } from '../../../utilities/repeatAsync.js';
 
 const BROWSER_INITIAL_HEIGHT_PIXELS = 768;
 const BROWSER_INITIAL_WIDTH_PIXELS = 1024;

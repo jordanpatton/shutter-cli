@@ -1,8 +1,8 @@
-import { DEFAULT_NEW_FILE_NAME, downloadAsync, IDownloadAsyncParameters } from '../utilities/downloadAsync.js';
-import { generateRandomInteger } from '../utilities/generateRandomInteger.js';
-import { getFileNameParts } from '../utilities/getFileNameParts.js';
-import { sleepAsync } from '../utilities/sleepAsync.js';
-import { IMoment } from './types.js';
+import { DEFAULT_NEW_FILE_NAME, downloadAsync, IDownloadAsyncParameters } from '../../../utilities/downloadAsync.js';
+import { generateRandomInteger } from '../../../utilities/generateRandomInteger.js';
+import { getFileNameParts } from '../../../utilities/getFileNameParts.js';
+import { sleepAsync } from '../../../utilities/sleepAsync.js';
+import { IMoment } from '../types.js';
 
 const THISLIFE_DOWNLOAD_URL = 'https://io.thislife.com/download';
 

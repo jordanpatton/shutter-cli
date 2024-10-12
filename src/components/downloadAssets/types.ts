@@ -1,5 +1,3 @@
-// This file defines types used by multiple `components`.
-
 /** Moment object from ThisLife API. */
 export interface IMoment {
     /** Stringified `number`. Seconds since Unix epoch. */

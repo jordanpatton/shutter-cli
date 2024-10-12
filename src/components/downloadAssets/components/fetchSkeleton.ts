@@ -1,5 +1,5 @@
-import { THISLIFE_JSON_URL } from './constants.js';
-import { IThisLifeApiResponseJson } from './types.js';
+import { THISLIFE_JSON_URL } from '../constants.js';
+import { IThisLifeApiResponseJson } from '../types.js';
 
 /** Payload format for successful request to `getSkeleton`. */
 interface IGetSkeletonResponseJsonSuccessPayload {
