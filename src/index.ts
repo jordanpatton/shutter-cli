@@ -4,19 +4,19 @@ import { getCommandLineParameter } from './utilities/getCommandLineParameter.js'
 /**
  * Main entrypoint for this program.
  * 
- * @returns Return value from workflow or void.
+ * @returns Return value from command or void.
  */
 export const main = (): ReturnType<typeof downloadAssets> | void => {
-    const workflow = getCommandLineParameter('--workflow').value;
-    if (typeof workflow === 'string') {
-        switch (workflow) {
-            case 'downloadAssets':
+    const command = getCommandLineParameter('--command').value;
+    if (typeof command === 'string') {
+        switch (command) {
+            case 'download-assets':
                 return downloadAssets(parseDownloadAssetsParameters());
             default:
-                throw new RangeError('workflow (required) must be one of: downloadAssets.');
+                throw new RangeError('command (required) must be one of: download-assets.');
         };
     } else {
-        throw new TypeError('workflow (required) must be a non-empty string.');
+        throw new TypeError('command (required) must be a non-empty string.');
     }
 };
 

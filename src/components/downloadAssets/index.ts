@@ -32,69 +32,69 @@ interface IDownloadAssetsParameters {
  */
 export const parseDownloadAssetsParameters = (): IDownloadAssetsParameters => {
     const parsed: IDownloadAssetsParameters = {};
-    // cognitoIdToken (optional): non-empty string
-    const cognitoIdToken = getCommandLineParameter('--cognitoIdToken').value;
+    // cognito-id-token (optional): non-empty string
+    const cognitoIdToken = getCommandLineParameter('--cognito-id-token').value;
     if (typeof cognitoIdToken === 'string') {
         if (cognitoIdToken.length) {
             parsed.cognitoIdToken = cognitoIdToken;
-            console.log('Parsed cognitoIdToken from command line.');
+            console.log('Parsed cognito-id-token from command line.');
         } else {
-            throw new TypeError('cognitoIdToken (optional) must be a non-empty string.');
+            throw new TypeError('cognito-id-token (optional) must be a non-empty string.');
         }
     }
-    // downloadDelayFixedMilliseconds (optional): positive integer
-    const downloadDelayFixedMilliseconds = getCommandLineParameter('--downloadDelayFixedMilliseconds').value;
+    // download-delay-fixed-milliseconds (optional): positive integer
+    const downloadDelayFixedMilliseconds = getCommandLineParameter('--download-delay-fixed-milliseconds').value;
     if (typeof downloadDelayFixedMilliseconds === 'string') {
         const f = parseFloat(downloadDelayFixedMilliseconds);
         if (!isNaN(f) && Number.isInteger(f) && f >= 0) {
             parsed.downloadDelayFixedMilliseconds = f;
-            console.log('Parsed downloadDelayFixedMilliseconds from command line.');
+            console.log('Parsed download-delay-fixed-milliseconds from command line.');
         } else {
-            throw new TypeError('downloadDelayFixedMilliseconds (optional) must be a positive integer.');
+            throw new TypeError('download-delay-fixed-milliseconds (optional) must be a positive integer.');
         }
     }
-    // downloadDelayJitterMilliseconds (optional): positive integer
-    const downloadDelayJitterMilliseconds = getCommandLineParameter('--downloadDelayJitterMilliseconds').value;
+    // download-delay-jitter-milliseconds (optional): positive integer
+    const downloadDelayJitterMilliseconds = getCommandLineParameter('--download-delay-jitter-milliseconds').value;
     if (typeof downloadDelayJitterMilliseconds === 'string') {
         const f = parseFloat(downloadDelayJitterMilliseconds);
         if (!isNaN(f) && Number.isInteger(f) && f >= 0) {
             parsed.downloadDelayJitterMilliseconds = f;
-            console.log('Parsed downloadDelayJitterMilliseconds from command line.');
+            console.log('Parsed download-delay-jitter-milliseconds from command line.');
         } else {
-            throw new TypeError('downloadDelayJitterMilliseconds (optional) must be a positive integer.');
+            throw new TypeError('download-delay-jitter-milliseconds (optional) must be a positive integer.');
         }
     }
-    // downloadToDirectory (optional): existing directory
-    const downloadToDirectory = getCommandLineParameter('--downloadToDirectory').value;
+    // download-to-directory (optional): existing directory
+    const downloadToDirectory = getCommandLineParameter('--download-to-directory').value;
     if (typeof downloadToDirectory === 'string') {
         // TODO: Check that the path points to a directory (not a file).
         if (existsSync(downloadToDirectory)) {
             parsed.downloadToDirectory = downloadToDirectory;
-            console.log('Parsed downloadToDirectory from command line.');
+            console.log('Parsed download-to-directory from command line.');
         } else {
-            throw new TypeError('downloadToDirectory (optional) must be an existing directory.');
+            throw new TypeError('download-to-directory (optional) must be an existing directory.');
         }
     }
-    // endTime (optional): new-Date-able expression
-    const endTime = getCommandLineParameter('--endTime').value;
+    // end-time (optional): new-Date-able expression
+    const endTime = getCommandLineParameter('--end-time').value;
     if (typeof endTime === 'string') {
         const d = new Date(endTime);
         if (!isNaN(d.getTime())) {
             parsed.endTimeUnixSeconds = Math.round(d.getTime() / 1000);
-            console.log('Parsed endTime from command line.');
+            console.log('Parsed end-time from command line.');
         } else {
-            throw new TypeError('endTime (optional) must be a valid date/time expression.');
+            throw new TypeError('end-time (optional) must be a valid date/time expression.');
         }
     }
-    // startTime (optional): new-Date-able expression
-    const startTime = getCommandLineParameter('--startTime').value;
+    // start-time (optional): new-Date-able expression
+    const startTime = getCommandLineParameter('--start-time').value;
     if (typeof startTime === 'string') {
         const d = new Date(startTime);
         if (!isNaN(d.getTime())) {
             parsed.startTimeUnixSeconds = Math.round(d.getTime() / 1000);
-            console.log('Parsed startTime from command line.');
+            console.log('Parsed start-time from command line.');
         } else {
-            throw new TypeError('startTime (optional) must be a valid date/time expression.');
+            throw new TypeError('start-time (optional) must be a valid date/time expression.');
         }
     }
     return parsed;
