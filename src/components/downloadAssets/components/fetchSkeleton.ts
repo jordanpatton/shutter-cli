@@ -1,18 +1,19 @@
 import { THISLIFE_JSON_URL } from '../constants.js';
 import { IThisLifeApiResponseJson } from '../types.js';
 
-/** Payload format for successful request to `getSkeleton`. */
+/** Payload format for successful request to `getSkeleton` (with or without data). */
 interface IGetSkeletonResponseJsonSuccessPayload {
     momentCount: number;
     signature: number;
+    /** Skeleton is `null` if there is no data available (i.e., account has no moments). */
     skeleton: {
         /** Stringified `number`. */
         count: string;
         /** Stringified date in format `YYYY-mm-dd`. */
         date: string;
-    }[];
+    }[] | null;
 }
-/** Response json format for `getSkeleton`. */
+/** Response json format for `getSkeleton` (success or failure, with or without data). */
 type TGetSkeletonResponseJson = IThisLifeApiResponseJson<IGetSkeletonResponseJsonSuccessPayload>;
 
 /** One day in milliseconds. */
@@ -23,11 +24,11 @@ const ONE_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
  * various other requests.
  * 
  * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
- * @returns Promisified response payload. Settles when payload is ready.
+ * @returns Promisified successful response payload. (Not null, but `skeleton` may be null if account has no moments.) Settles when payload is ready.
  */
 const fetchSkeletonViaApi = async (
     cognitoIdToken: string,
-): Promise<IGetSkeletonResponseJsonSuccessPayload> => {
+): Promise<NonNullable<TGetSkeletonResponseJson['result']['payload']>> => {
     const stringifiedBodyParams: string[] = [
         `"${cognitoIdToken}"`, // {string} Amazon Cognito identification token.
         'false',               // {boolean} Whether or not to sort by upload date.
@@ -38,18 +39,18 @@ const fetchSkeletonViaApi = async (
     });
     const responseJson: TGetSkeletonResponseJson = await response.json();
     // HTTP response code may be 200, but response body can still indicate failure.
-    if (!responseJson.result.success || typeof responseJson.result.payload !== 'object') {
+    if (!responseJson.result.success || responseJson.result.payload === null || typeof responseJson.result.payload === 'undefined') {
         throw new Error('ERROR: Failed to fetch skeleton.');
     }
     // else
-    return responseJson.result.payload as IGetSkeletonResponseJsonSuccessPayload;
+    return responseJson.result.payload;
 };
 
 /**
  * Fetches a skeleton via API and derives a time range from the payload.
  * 
  * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
- * @returns Promisified object with fields derived from skeleton. Settles when data is ready.
+ * @returns Promisified object with fields derived from skeleton OR void if skeleton is empty. Settles when data is ready.
  */
 export const fetchSkeleton = async (
     cognitoIdToken: string,
@@ -64,22 +65,23 @@ export const fetchSkeleton = async (
     numberOfMoments: IGetSkeletonResponseJsonSuccessPayload['momentCount'];
     /** Derived start time in seconds since Unix epoch. */
     startTimeUnixSeconds: number;
-}> => {
+} | void> => {
     const { momentCount, skeleton } = await fetchSkeletonViaApi(cognitoIdToken);
     if (!Array.isArray(skeleton) || !skeleton.length) {
-        throw new Error('ERROR: Malformed skeleton.');
+        console.log('Request succeeded, but skeleton is empty.');
+        return;
+    } else {
+        // `skeleton[].date` is a `string` with format YYYY-mm-dd.
+        skeleton.sort((a, b) => (new Date(a.date)).getTime() - (new Date(b.date)).getTime());
+        const { date: earliestDateString } = skeleton[0];
+        const { date: latestDateString } = skeleton[skeleton.length - 1];
+        console.log(`Request succeeded. ${momentCount} moments are available from ${earliestDateString} to ${latestDateString}.`);
+
+        // Start time is one day earlier than `earliestDateString`.
+        const startTimeUnixSeconds = Math.round(((new Date(earliestDateString)).getTime() - ONE_DAY_IN_MILLISECONDS) / 1000);
+        // End time is one day later than `latestDateString`.
+        const endTimeUnixSeconds = Math.round(((new Date(latestDateString)).getTime() + ONE_DAY_IN_MILLISECONDS) / 1000);
+
+        return { earliestDateString, endTimeUnixSeconds, latestDateString, numberOfMoments: momentCount, startTimeUnixSeconds };
     }
-
-    // `skeleton[].date` is a `string` with format YYYY-mm-dd.
-    skeleton.sort((a, b) => (new Date(a.date)).getTime() - (new Date(b.date)).getTime());
-    const { date: earliestDateString } = skeleton[0];
-    const { date: latestDateString } = skeleton[skeleton.length - 1];
-    console.log(`Request succeeded. ${momentCount} moments are available from ${earliestDateString} to ${latestDateString}.`);
-
-    // Start time is one day earlier than `earliestDateString`.
-    const startTimeUnixSeconds = Math.round(((new Date(earliestDateString)).getTime() - ONE_DAY_IN_MILLISECONDS) / 1000);
-    // End time is one day later than `latestDateString`.
-    const endTimeUnixSeconds = Math.round(((new Date(latestDateString)).getTime() + ONE_DAY_IN_MILLISECONDS) / 1000);
-
-    return { earliestDateString, endTimeUnixSeconds, latestDateString, numberOfMoments: momentCount, startTimeUnixSeconds };
 };

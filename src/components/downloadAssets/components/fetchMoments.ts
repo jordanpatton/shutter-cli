@@ -1,18 +1,22 @@
 import { THISLIFE_JSON_URL } from '../constants.js';
 import { IMoment, IThisLifeApiResponseJson } from '../types.js';
 
-/** Payload format for successful request to `getPaginatedMoments`. */
-interface IGetPaginatedMomentsResponseJsonSuccessPayload {
-    /** Can also be a hexadecimal-encoded string, but we intentionally ignore that fact. */
-    moments: IMoment[];
+/** Payload format for successful request to `getPaginatedMoments` when the page contains data. */
+interface IGetPaginatedMomentsResponseJsonSuccessWithDataPayload {
+    /** Can be a hexadecimal-encoded string when requested as such. */
+    moments: IMoment[] | string;
     /** Whether or not more pages are available. */
     morePages: boolean;
     /** Seconds since Unix epoch. NOT stringified. */
     oldestMomentTimestamp: number;
     signature: number;
 }
-/** Response json format for `getPaginatedMoments`. */
-type TGetPaginatedMomentsResponseJson = IThisLifeApiResponseJson<IGetPaginatedMomentsResponseJsonSuccessPayload>;
+/** Payload format for successful request to `getPaginatedMoments` when the page contains no data. */
+type TGetPaginatedMomentsResponseJsonSuccessWithoutDataPayload = [];
+/** Response json format for `getPaginatedMoments` (success or failure, with or without data). */
+type TGetPaginatedMomentsResponseJson = IThisLifeApiResponseJson<
+    IGetPaginatedMomentsResponseJsonSuccessWithDataPayload | TGetPaginatedMomentsResponseJsonSuccessWithoutDataPayload
+>;
 
 /**
  * Fetches paginated moments from newest to oldest.
@@ -35,14 +39,14 @@ type TGetPaginatedMomentsResponseJson = IThisLifeApiResponseJson<IGetPaginatedMo
  * @param startTimeUnixSeconds - Start time in seconds since Unix epoch. Should remain constant across requests.
  * @param endTimeUnixSeconds - End time in seconds since Unix epoch. Should decrease with each request.
  * @param maximumNumberOfItemsPerPage - Maximum number of items per page. Should be large to avoid an infinite loop.
- * @returns Promisified response payload. Settles when payload is ready.
+ * @returns Promisified successful response payload. (Not null, but may be empty array if page contains no data.) Settles when payload is ready.
  */
 const fetchPaginatedMomentsViaApi = async (
     cognitoIdToken: string,
     startTimeUnixSeconds: number,
     endTimeUnixSeconds: number,
     maximumNumberOfItemsPerPage: number = 1000,
-): Promise<IGetPaginatedMomentsResponseJsonSuccessPayload> => {
+): Promise<NonNullable<TGetPaginatedMomentsResponseJson['result']['payload']>> => {
     const stringifiedBodyParams: string[] = [
         `"${cognitoIdToken}"`,            // {string} Amazon Cognito identification token.
         `"${startTimeUnixSeconds}"`,      // {string} Start time in seconds since Unix epoch.
@@ -59,11 +63,11 @@ const fetchPaginatedMomentsViaApi = async (
     });
     const responseJson: TGetPaginatedMomentsResponseJson = await response.json();
     // HTTP response code may be 200, but response body can still indicate failure.
-    if (!responseJson.result.success || typeof responseJson.result.payload !== 'object') {
+    if (!responseJson.result.success || responseJson.result.payload === null || typeof responseJson.result.payload === 'undefined') {
         throw new Error('ERROR: Failed to fetch paginated moments.');
     }
     // else
-    return responseJson.result.payload as IGetPaginatedMomentsResponseJsonSuccessPayload;
+    return responseJson.result.payload;
 };
 
 /**
@@ -85,31 +89,42 @@ export const fetchMoments = async (
     let previousOldestMomentTimestamp: number | undefined;
     for (let i = 0; true; i++) {
         // Fetch a page of moments. Pagination occurs from newest to oldest, so end time is the only moving target.
-        const { moments, morePages, oldestMomentTimestamp } = await fetchPaginatedMomentsViaApi(
+        const payload = await fetchPaginatedMomentsViaApi(
             cognitoIdToken,
             startTimeUnixSeconds,
             typeof previousOldestMomentTimestamp === 'number' ? previousOldestMomentTimestamp : endTimeUnixSeconds,
             1000, // The more items per page, the less likely it is that we'll end up in an infinite loop.
         );
-        // Validate moments.
-        if (!Array.isArray(moments)) {
-            throw new Error('ERROR: Malformed moments.');
-        }
-        // `oldestMomentTimestamp` must decrease with every iteration or else we're stuck in an infinite loop.
-        if (typeof previousOldestMomentTimestamp === 'number' && oldestMomentTimestamp >= previousOldestMomentTimestamp) {
-            // Alternatively, we could increase number of items per page and try again (instead of erroring out).
-            throw new Error('ERROR: Infinite loop while fetching moments.');
-        } else {
-            previousOldestMomentTimestamp = oldestMomentTimestamp;
-        }
-        // Deduplicate and accumulate moments.
-        const deduplicatedMoments = moments.filter(v => !accumulatedMoments.some(w => w.uid === v.uid));
-        accumulatedMoments = [...accumulatedMoments, ...deduplicatedMoments];
-        // Notify user of progress.
-        console.log(`Request #${i + 1} succeeded. Fetched ${moments.length} moments (duplicates: ${moments.length - deduplicatedMoments.length}; total: ${accumulatedMoments.length}; oldest: ${oldestMomentTimestamp}).`);
-        // Stop iterating if there are no more pages.
-        if (!morePages) {
+        // Verify that the response payload contains data.
+        if (Array.isArray(payload)) {
+            // Request succeeded, but payload contains no data. (Specified time range is probably empty.)
+            console.log(`Request #${i + 1} succeeded, but payload is empty.`);
             break;
+        } else {
+            // Request succeeded, and payload contains data.
+            const { moments, morePages, oldestMomentTimestamp } = payload;
+            // `oldestMomentTimestamp` must decrease with every iteration or else we're stuck in an infinite loop.
+            if (typeof previousOldestMomentTimestamp === 'number' && oldestMomentTimestamp >= previousOldestMomentTimestamp) {
+                // Alternatively, we could increase number of items per page and try again (instead of erroring out).
+                throw new Error('ERROR: Infinite loop while fetching moments.');
+            } else {
+                previousOldestMomentTimestamp = oldestMomentTimestamp;
+            }
+            // Verify that `moments` is not a hexadecimal-encoded string.
+            if (Array.isArray(moments)) {
+                // Deduplicate and accumulate moments.
+                const deduplicatedMoments = moments.filter(v => !accumulatedMoments.some(w => w.uid === v.uid));
+                accumulatedMoments = [...accumulatedMoments, ...deduplicatedMoments];
+                // Notify user of progress.
+                console.log(`Request #${i + 1} succeeded. Fetched ${moments.length} moments (duplicates: ${moments.length - deduplicatedMoments.length}; total: ${accumulatedMoments.length}; oldest: ${oldestMomentTimestamp}).`);
+            } else {
+                // TODO: Handle hexadecimal-string-encoded moments.
+                console.log(`Request #${i + 1} succeeded, but moments are hexadecimal-string-encoded. Skipping this page.`);
+            }
+            // Stop iterating if there are no more pages.
+            if (!morePages) {
+                break;
+            }
         }
     }
     return accumulatedMoments;

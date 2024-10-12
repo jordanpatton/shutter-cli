@@ -144,19 +144,24 @@ export const downloadAssets = async ({
     } else {
         console.log('Fetching skeleton...');
         const o = await fetchSkeleton(cognitoIdToken);
-        if (typeof givenStartTimeUnixSeconds === 'number') {
-            startTimeUnixSeconds = givenStartTimeUnixSeconds;
-            console.log('Using given start time.');
+        if (typeof o === 'undefined') {
+            console.log('Terminating due to empty skeleton.');
+            return;
         } else {
-            startTimeUnixSeconds = o.startTimeUnixSeconds;
-            console.log(`Using skeleton start time: ${startTimeUnixSeconds} (${o.earliestDateString} minus 1 day).`);
-        }
-        if (typeof givenEndTimeUnixSeconds === 'number') {
-            endTimeUnixSeconds = givenEndTimeUnixSeconds;
-            console.log('Using given end time.');
-        } else {
-            endTimeUnixSeconds = o.endTimeUnixSeconds;
-            console.log(`Using skeleton end time: ${endTimeUnixSeconds} (${o.latestDateString} plus 1 day).`);
+            if (typeof givenStartTimeUnixSeconds === 'number') {
+                startTimeUnixSeconds = givenStartTimeUnixSeconds;
+                console.log('Using given start time.');
+            } else {
+                startTimeUnixSeconds = o.startTimeUnixSeconds;
+                console.log(`Using skeleton start time: ${startTimeUnixSeconds} (${o.earliestDateString} minus 1 day).`);
+            }
+            if (typeof givenEndTimeUnixSeconds === 'number') {
+                endTimeUnixSeconds = givenEndTimeUnixSeconds;
+                console.log('Using given end time.');
+            } else {
+                endTimeUnixSeconds = o.endTimeUnixSeconds;
+                console.log(`Using skeleton end time: ${endTimeUnixSeconds} (${o.latestDateString} plus 1 day).`);
+            }
         }
     }
     console.groupEnd();

@@ -32,8 +32,8 @@ export interface IThisLifeApiResponseJson<TSuccessPayload> {
         /** Known good values: `null`. */
         errors: any;
         message: string;
-        /** Payload is `[]` on failure or API-method-specific format on success. */
-        payload: [] | TSuccessPayload;
+        /** Payload is API-method-specific format on success OR `null` on failure. */
+        payload: TSuccessPayload | null;
         success: boolean;
     }
 }
