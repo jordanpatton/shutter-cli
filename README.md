@@ -1,6 +1,30 @@
 # Shutter CLI
 Unofficial command-line interface for [Shutterfly](https://www.shutterfly.com).
 
+## Getting Started
+Required: [Node.js (latest LTS)](https://nodejs.org/en/download/package-manager)
+```shell
+# Clone project OR download archive from GitHub.
+git clone https://github.com/jordanpatton/shutter-cli.git
+cd shutter-cli
+npm install
+npm run build && npm run start
+```
+
+## Examples
+```shell
+# Build application (always do this first!).
+npm run build
+# Download all assets from a Shutterfly account.
+npm run start -- --command download-assets
+# Download assets to a specific directory using an existing login session.
+npm run start -- --command download-assets --cognito-id-token "YOUR TOKEN HERE" --download-to-directory "/path/to/directory"
+# Download assets between two dates with a longer delay between downloads.
+npm run start -- --command download-assets --start-time 2023-01-01 --end-time 2023-12-31 --download-delay-fixed-milliseconds 5000 --download-delay-jitter-milliseconds 2000
+# Manually run a command without npm scripts.
+node ./dist/index.js --command download-assets
+```
+
 ## Repository Organization
 - `fixtures`: Sample requests, responses, and other data structures.
 - `src`: Business logic.
