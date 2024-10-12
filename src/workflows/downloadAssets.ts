@@ -1,9 +1,9 @@
 import { existsSync } from 'node:fs';
 
-import { downloadAssetsSerial } from '../tasks/downloadAssetsSerial.js';
-import { fetchMoments } from '../tasks/fetchMoments.js';
-import { fetchSkeleton } from '../tasks/fetchSkeleton.js';
-import { logIn } from '../tasks/logIn.js';
+import { downloadAssetsSerial } from '../components/downloadAssetsSerial.js';
+import { fetchMoments } from '../components/fetchMoments.js';
+import { fetchSkeleton } from '../components/fetchSkeleton.js';
+import { logIn } from '../components/logIn.js';
 import { getCommandLineParameter } from '../utilities/getCommandLineParameter.js';
 
 /** `downloadAssets` parameters. */

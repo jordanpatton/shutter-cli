@@ -1,4 +1,4 @@
-// This file defines types used by multiple `tasks`.
+// This file defines types used by multiple `components`.
 
 /** Moment object from ThisLife API. */
 export interface IMoment {
