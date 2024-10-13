@@ -1,0 +1,29 @@
+{
+    "result": {
+        "_explicitType": "ResponseWrapper",
+        "success": true,
+        "errors": null,
+        "message": "Success.",
+        "payload": {
+            "moments": [
+                {
+                    "uid": "1910861342156453",
+                    "life_uid": "023031624126",
+                    "moment_date": "1297693703",
+                    "moment_type": "image",
+                    "created": "1728779569",
+                    "orig_width": 1920,
+                    "orig_height": 1080,
+                    "rating": 0,
+                    "effects_modified_date": "1728779569",
+                    "encrypted_id": "00-778gKrVn1V2Tt80F4luco1LRUVEG1qLegxuDpeasVw69JzKp3anZ6FebynHt38x3ldNTLfctJ__wYVBQ_4iUow"
+                }
+            ],
+            "signature": 1728779569,
+            "morePages": false,
+            "oldestMomentTimestamp": 1297693703
+        }
+    },
+    "id": "",
+    "error": null
+}
