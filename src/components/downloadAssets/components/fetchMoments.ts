@@ -1,8 +1,8 @@
 import { THISLIFE_JSON_URL } from '../constants.js';
 import { IMoment, IThisLifeApiResponseJson } from '../types.js';
 
-/** Payload format for successful request to `getPaginatedMoments` when the page contains data. */
-interface IGetPaginatedMomentsResponseJsonSuccessWithDataPayload {
+/** Payload format for successful request to `getPaginatedMoments` (with data in the response). */
+interface IGetPaginatedMomentsResponseJsonSuccessPayloadWithData {
     /** Can be a hexadecimal-encoded string when requested as such. */
     moments: IMoment[] | string;
     /** Whether or not more pages are available. */
@@ -11,12 +11,12 @@ interface IGetPaginatedMomentsResponseJsonSuccessWithDataPayload {
     oldestMomentTimestamp: number;
     signature: number;
 }
-/** Payload format for successful request to `getPaginatedMoments` when the page contains no data. */
-type TGetPaginatedMomentsResponseJsonSuccessWithoutDataPayload = [];
-/** Response json format for `getPaginatedMoments` (success or failure, with or without data). */
-type TGetPaginatedMomentsResponseJson = IThisLifeApiResponseJson<
-    IGetPaginatedMomentsResponseJsonSuccessWithDataPayload | TGetPaginatedMomentsResponseJsonSuccessWithoutDataPayload
->;
+/** Payload format for successful request to `getPaginatedMoments` (without data in the response). */
+type TGetPaginatedMomentsResponseJsonSuccessPayloadWithoutData = [];
+/** Payload format for successful request to `getPaginatedMoments` (with or without data in the response). */
+type TGetPaginatedMomentsResponseJsonSuccessPayload = IGetPaginatedMomentsResponseJsonSuccessPayloadWithData | TGetPaginatedMomentsResponseJsonSuccessPayloadWithoutData;
+/** Response json format for `getPaginatedMoments` (success or failure, with or without data in the response). */
+type TGetPaginatedMomentsResponseJson = IThisLifeApiResponseJson<TGetPaginatedMomentsResponseJsonSuccessPayload>;
 
 /**
  * Fetches paginated moments from newest to oldest.
@@ -46,7 +46,7 @@ const fetchPaginatedMomentsViaApi = async (
     startTimeUnixSeconds: number,
     endTimeUnixSeconds: number,
     maximumNumberOfItemsPerPage: number = 1000,
-): Promise<NonNullable<TGetPaginatedMomentsResponseJson['result']['payload']>> => {
+): Promise<TGetPaginatedMomentsResponseJsonSuccessPayload> => {
     const stringifiedBodyParams: string[] = [
         `"${cognitoIdToken}"`,            // {string} Amazon Cognito identification token.
         `"${startTimeUnixSeconds}"`,      // {string} Start time in seconds since Unix epoch.
@@ -63,8 +63,8 @@ const fetchPaginatedMomentsViaApi = async (
     });
     const responseJson: TGetPaginatedMomentsResponseJson = await response.json();
     // HTTP response code may be 200, but response body can still indicate failure.
-    if (!responseJson.result.success || responseJson.result.payload === null || typeof responseJson.result.payload === 'undefined') {
-        throw new Error('ERROR: Failed to fetch paginated moments.');
+    if (!responseJson.result.success) {
+        throw new Error(`ERROR: Failed to fetch paginated moments. (${responseJson.result.message})`);
     }
     // else
     return responseJson.result.payload;

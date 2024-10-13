@@ -1,7 +1,7 @@
 import { THISLIFE_JSON_URL } from '../constants.js';
 import { IThisLifeApiResponseJson } from '../types.js';
 
-/** Payload format for successful request to `getSkeleton` (with or without data). */
+/** Payload format for successful request to `getSkeleton` (with or without data in the response). */
 interface IGetSkeletonResponseJsonSuccessPayload {
     momentCount: number;
     signature: number;
@@ -13,7 +13,7 @@ interface IGetSkeletonResponseJsonSuccessPayload {
         date: string;
     }[] | null;
 }
-/** Response json format for `getSkeleton` (success or failure, with or without data). */
+/** Response json format for `getSkeleton` (success or failure, with or without data in the response). */
 type TGetSkeletonResponseJson = IThisLifeApiResponseJson<IGetSkeletonResponseJsonSuccessPayload>;
 
 /** One day in milliseconds. */
@@ -28,7 +28,7 @@ const ONE_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
  */
 const fetchSkeletonViaApi = async (
     cognitoIdToken: string,
-): Promise<NonNullable<TGetSkeletonResponseJson['result']['payload']>> => {
+): Promise<IGetSkeletonResponseJsonSuccessPayload> => {
     const stringifiedBodyParams: string[] = [
         `"${cognitoIdToken}"`, // {string} Amazon Cognito identification token.
         'false',               // {boolean} Whether or not to sort by upload date.
@@ -39,8 +39,8 @@ const fetchSkeletonViaApi = async (
     });
     const responseJson: TGetSkeletonResponseJson = await response.json();
     // HTTP response code may be 200, but response body can still indicate failure.
-    if (!responseJson.result.success || responseJson.result.payload === null || typeof responseJson.result.payload === 'undefined') {
-        throw new Error('ERROR: Failed to fetch skeleton.');
+    if (!responseJson.result.success) {
+        throw new Error(`ERROR: Failed to fetch skeleton. (${responseJson.result.message})`);
     }
     // else
     return responseJson.result.payload;

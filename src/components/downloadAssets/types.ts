@@ -21,19 +21,26 @@ export interface IMoment {
     uid: string;
 }
 
-/** Response json format for ThisLife API. */
+/** ThisLife API response json. `payload` depends on `success`. */
 export interface IThisLifeApiResponseJson<TSuccessPayload> {
     /** Known good values: `null`. */
     error: any;
     id: string;
-    result: {
+    result: { // Unconditional fields...
         /** Known good values: `'ResponseWrapper'`. */
         _explicitType: string;
         /** Known good values: `null`. */
         errors: any;
         message: string;
-        /** Payload is API-method-specific format on success OR `null` on failure. */
-        payload: TSuccessPayload | null;
-        success: boolean;
-    }
+    } & (
+        { // Conditional fields: if `success` is `true`...
+            /** Payload is API-method-specific format on success. */
+            payload: TSuccessPayload;
+            success: true;
+        } | { // Conditional fields: if `success` is `false`...
+            /** Payload is `[]` for invalid token OR `null` for bad/missing parameter. */
+            payload: [] | null;
+            success: false;
+        }
+    )
 }
