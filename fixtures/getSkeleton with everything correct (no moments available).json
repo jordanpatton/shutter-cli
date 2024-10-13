@@ -1,0 +1,15 @@
+{
+    "result": {
+        "_explicitType": "ResponseWrapper",
+        "success": true,
+        "errors": null,
+        "message": "Success.",
+        "payload": {
+            "skeleton": null,
+            "momentCount": 0,
+            "signature": 1234567890
+        }
+    },
+    "id": "",
+    "error": null
+}

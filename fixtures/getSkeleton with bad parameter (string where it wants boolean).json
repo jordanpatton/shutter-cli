@@ -1,0 +1,11 @@
+{
+    "result": {
+        "_explicitType": "ResponseWrapper",
+        "success": false,
+        "errors": null,
+        "message": "Invalid request. Wrong or missing Parameter.",
+        "payload": null
+    },
+    "id": "",
+    "error": null
+}

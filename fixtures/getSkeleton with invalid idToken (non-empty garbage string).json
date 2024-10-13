@@ -1,0 +1,11 @@
+{
+    "result": {
+        "_explicitType": "ResponseWrapper",
+        "success": false,
+        "errors": null,
+        "message": "Invalid token.",
+        "payload": []
+    },
+    "id": "",
+    "error": null
+}
