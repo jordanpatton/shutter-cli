@@ -127,7 +127,7 @@ export const downloadAssets = async ({
             cognitoIdToken = newCognitoIdToken;
             console.log(`Using Cognito idToken from Shutterfly:\n${newCognitoIdToken}`);
         } else {
-            throw new Error('ERROR: Failed to log in to Shutterfly.');
+            throw new Error('Failed to log in to Shutterfly.');
         }
     }
     console.groupEnd();

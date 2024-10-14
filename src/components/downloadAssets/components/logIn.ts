@@ -39,7 +39,7 @@ export const logIn = async (): Promise<string | undefined> => {
         // For some unknown reason this dumps an error to stdout unless we first
         // `browser.close()`.
         if (!puppeteerScriptIsFinished) {
-            console.error('ERROR: Page was closed prematurely.');
+            console.error('Page was closed prematurely.');
             browser.close().finally(() => {process.exit();});
         }
     });

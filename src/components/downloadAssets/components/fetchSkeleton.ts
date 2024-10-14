@@ -40,7 +40,7 @@ const fetchSkeletonViaApi = async (
     const responseJson: TGetSkeletonResponseJson = await response.json();
     // HTTP response code may be 200, but response body can still indicate failure.
     if (!responseJson.result.success) {
-        throw new Error(`ERROR: Failed to fetch skeleton. (${responseJson.result.message})`);
+        throw new Error(`Failed to fetch skeleton. (${responseJson.result.message})`);
     }
     // else
     return responseJson.result.payload;

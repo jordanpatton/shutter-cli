@@ -64,7 +64,7 @@ const fetchPaginatedMomentsViaApi = async (
     const responseJson: TGetPaginatedMomentsResponseJson = await response.json();
     // HTTP response code may be 200, but response body can still indicate failure.
     if (!responseJson.result.success) {
-        throw new Error(`ERROR: Failed to fetch paginated moments. (${responseJson.result.message})`);
+        throw new Error(`Failed to fetch paginated moments. (${responseJson.result.message})`);
     }
     // else
     return responseJson.result.payload;
@@ -106,7 +106,7 @@ export const fetchMoments = async (
             // `oldestMomentTimestamp` must decrease with every iteration or else we're stuck in an infinite loop.
             if (typeof previousOldestMomentTimestamp === 'number' && oldestMomentTimestamp >= previousOldestMomentTimestamp) {
                 // Alternatively, we could increase number of items per page and try again (instead of erroring out).
-                throw new Error('ERROR: Infinite loop while fetching moments.');
+                throw new Error('Detected infinite loop while fetching moments.');
             } else {
                 previousOldestMomentTimestamp = oldestMomentTimestamp;
             }
