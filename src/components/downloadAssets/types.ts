@@ -21,7 +21,7 @@ export interface IMoment {
     uid: string;
 }
 
-/** ThisLife API response json. `payload` depends on `success`. */
+/** ThisLife API response json. Has a discriminated union where `result.success` determines `result.payload`. */
 export interface IThisLifeApiResponseJson<TSuccessPayload> {
     /** Known good values: `null`. */
     error: any;
@@ -36,10 +36,12 @@ export interface IThisLifeApiResponseJson<TSuccessPayload> {
         { // Conditional fields: if `success` is `true`...
             /** Payload is API-method-specific format on success. */
             payload: TSuccessPayload;
+            /** Discriminator for `payload`. */
             success: true;
         } | { // Conditional fields: if `success` is `false`...
             /** Payload is `[]` for invalid token OR `null` for bad/missing parameter. */
             payload: [] | null;
+            /** Discriminator for `payload`. */
             success: false;
         }
     )
