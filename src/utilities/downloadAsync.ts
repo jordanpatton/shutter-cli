@@ -14,11 +14,11 @@ export interface IDownloadAsyncParameters {
     /** Whether or not to create the destination directory (aka `toDirectory`) if it does not already exist. */
     shouldMakeDirectory?: boolean;
     /** Destination directory for downloaded resource. */
-    toDirectory: TPathLike,
+    toDirectory: TPathLike;
     /** Name for downloaded resource. Defaults to `Content-Disposition` file name in response headers. */
     toFileName?: string | ((contentDispositionFileName: ReturnType<typeof getFileNameFromContentDispositionHeader>) => string);
     /** `options` passed to `createWriteStream(path, options)` for writing a file. May include `flags`. */
-    writeStreamOptions?: Parameters<typeof createWriteStream>[1],
+    writeStreamOptions?: Parameters<typeof createWriteStream>[1];
 }
 
 /** Default file name (i.e., base name + extension) for a newly-downloaded file. */

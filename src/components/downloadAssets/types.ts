@@ -44,5 +44,5 @@ export interface IThisLifeApiResponseJson<TSuccessPayload> {
             /** Discriminator for `payload`. */
             success: false;
         }
-    )
+    );
 }
