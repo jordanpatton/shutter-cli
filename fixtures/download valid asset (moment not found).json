@@ -1,0 +1,14 @@
+{
+    "body": {
+        "result": {
+            "success": false,
+            "errors": [
+                "Moment not found."
+            ],
+            "message": "Moment not found.",
+            "payload": null
+        },
+        "id": "",
+        "errors": null
+    }
+}
