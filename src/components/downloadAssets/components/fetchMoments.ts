@@ -1,5 +1,5 @@
 import { THISLIFE_JSON_URL } from '../constants.js';
-import { IMoment, IThisLifeApiResponseJson } from '../types.js';
+import { IMoment, IThisLifeJsonResponseJson } from '../types.js';
 
 /** Payload format for successful request to `getPaginatedMoments` (with data in the response). */
 interface IGetPaginatedMomentsResponseJsonSuccessPayloadWithData {
@@ -16,7 +16,7 @@ type TGetPaginatedMomentsResponseJsonSuccessPayloadWithoutData = [];
 /** Payload format for successful request to `getPaginatedMoments` (with or without data in the response). */
 type TGetPaginatedMomentsResponseJsonSuccessPayload = IGetPaginatedMomentsResponseJsonSuccessPayloadWithData | TGetPaginatedMomentsResponseJsonSuccessPayloadWithoutData;
 /** Response json format for `getPaginatedMoments` (success or failure, with or without data in the response). */
-type TGetPaginatedMomentsResponseJson = IThisLifeApiResponseJson<TGetPaginatedMomentsResponseJsonSuccessPayload>;
+type TGetPaginatedMomentsResponseJson = IThisLifeJsonResponseJson<TGetPaginatedMomentsResponseJsonSuccessPayload>;
 
 /**
  * Fetches paginated moments from newest to oldest.

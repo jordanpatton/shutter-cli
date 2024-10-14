@@ -1,5 +1,5 @@
 import { THISLIFE_JSON_URL } from '../constants.js';
-import { IThisLifeApiResponseJson } from '../types.js';
+import { IThisLifeJsonResponseJson } from '../types.js';
 
 /** Payload format for successful request to `getSkeleton` (with or without data in the response). */
 interface IGetSkeletonResponseJsonSuccessPayload {
@@ -14,7 +14,7 @@ interface IGetSkeletonResponseJsonSuccessPayload {
     }[] | null;
 }
 /** Response json format for `getSkeleton` (success or failure, with or without data in the response). */
-type TGetSkeletonResponseJson = IThisLifeApiResponseJson<IGetSkeletonResponseJsonSuccessPayload>;
+type TGetSkeletonResponseJson = IThisLifeJsonResponseJson<IGetSkeletonResponseJsonSuccessPayload>;
 
 /** One day in milliseconds. */
 const ONE_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;

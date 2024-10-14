@@ -21,8 +21,8 @@ export interface IMoment {
     uid: string;
 }
 
-/** ThisLife API response json. Has a discriminated union where `result.success` determines `result.payload`. */
-export interface IThisLifeApiResponseJson<TSuccessPayload> {
+/** ThisLife JSON API response json. Has a discriminated union where `result.success` determines `result.payload`. */
+export interface IThisLifeJsonResponseJson<TSuccessPayload> {
     /** Known good values: `null`. */
     error: any;
     id: string;
