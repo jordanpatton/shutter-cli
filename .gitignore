@@ -132,4 +132,3 @@ dist
 # custom
 .DS_Store
 dist/
-ignore/
