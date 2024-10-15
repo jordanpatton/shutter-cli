@@ -10,6 +10,8 @@ import {
 
 /** `downloadAsync` parameters. */
 export interface IDownloadAsyncParameters {
+    /** `node:fs.createWriteStream` options. May include `flags`. */
+    createWriteStreamOptions?: IWriteStreamToFileAsyncParameters['createWriteStreamOptions'];
     /** `options` passed to `fetch(url, options)` for downloading a resource. */
     fetchOptions?: Parameters<typeof fetch>[1];
     /** URL of a resource to be downloaded. */
@@ -20,8 +22,6 @@ export interface IDownloadAsyncParameters {
     toDirectory?: IWriteStreamToFileAsyncParameters['toDirectory'];
     /** Name for downloaded resource. Defaults to `Content-Disposition` file name in response headers. */
     toFileName?: string | ((contentDispositionFileName: ReturnType<typeof getFileNameFromContentDispositionHeader>) => string);
-    /** `options` passed to `createWriteStream(path, options)` for writing a file. May include `flags`. */
-    writeStreamOptions?: IWriteStreamToFileAsyncParameters['writeStreamOptions'];
 }
 
 /**
@@ -31,12 +31,12 @@ export interface IDownloadAsyncParameters {
  * @returns Promisified void. Settles when download finishes.
  */
 export const downloadAsync = async ({
+    createWriteStreamOptions,
     fetchOptions,
     fromUrl,
     shouldMakeDirectory,
     toDirectory,
     toFileName,
-    writeStreamOptions,
 }: IDownloadAsyncParameters): Promise<void> => {
     // Request file.
     const response = await fetch(fromUrl, fetchOptions);
@@ -57,10 +57,10 @@ export const downloadAsync = async ({
         : DEFAULT_NEW_FILE_NAME;
     // Write file.
     return writeStreamToFileAsync({
+        createWriteStreamOptions,
         fromStream: Readable.fromWeb(response.body as IReadableStream<any>),
         shouldMakeDirectory,
         toDirectory,
         toFileName: _toFileName,
-        writeStreamOptions,
     });
 };
