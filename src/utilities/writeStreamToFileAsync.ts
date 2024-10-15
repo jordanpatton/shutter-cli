@@ -1,0 +1,52 @@
+import { createWriteStream, existsSync, PathLike as TPathLike } from 'node:fs';
+import { mkdir } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { Readable } from 'node:stream';
+import { finished } from 'node:stream/promises';
+
+/** Default directory for a newly-written file. */
+const DEFAULT_NEW_FILE_DIRECTORY = '.';
+/** Default file name (i.e., base name + extension) for a newly-written file. */
+export const DEFAULT_NEW_FILE_NAME = 'untitled';
+
+/** `writeStreamToFileAsync` parameters. */
+export interface IWriteStreamToFileAsyncParameters {
+    /** Readable stream of data to be written. @see https://nodejs.org/api/stream.html#readable-streams */
+    fromStream: Readable;
+    /** Whether or not to create the destination directory (aka `toDirectory`) if it does not already exist. */
+    shouldMakeDirectory?: boolean;
+    /** Destination directory for written file. */
+    toDirectory?: TPathLike;
+    /** File name for written file. */
+    toFileName?: string;
+    /** `options` passed to `createWriteStream(path, options)` for writing the file. May include `flags`. */
+    writeStreamOptions?: Parameters<typeof createWriteStream>[1];
+}
+
+/**
+ * Writes from a given stream to a file at a given path (directory + file name). `async`-compatible.
+ * 
+ * @param parameters - Parameters.
+ * @returns Promisified void. Settles when write operation finishes.
+ * 
+ * @see https://stackoverflow.com/questions/37614649/how-can-i-download-and-save-a-file-using-the-fetch-api-node-js
+ * @see https://stackoverflow.com/questions/11944932/how-to-download-a-file-with-node-js-without-using-third-party-libraries
+ * @see https://nodejs.org/api/fs.html#filehandlecreatewritestreamoptions
+ * @see https://nodejs.org/api/fs.html#file-system-flags
+ */
+export const writeStreamToFileAsync = async ({
+    fromStream,
+    shouldMakeDirectory = false,
+    toDirectory = DEFAULT_NEW_FILE_DIRECTORY,
+    toFileName = DEFAULT_NEW_FILE_NAME,
+    writeStreamOptions = { flags: 'wx' },
+}: IWriteStreamToFileAsyncParameters): Promise<void> => {
+    // Determine path (directory + file name).
+    if (shouldMakeDirectory && !existsSync(toDirectory)) {
+        await mkdir(toDirectory);
+    }
+    const toPath = resolve(String(toDirectory), toFileName);
+    // Write stream to path.
+    const writeStream = createWriteStream(toPath, writeStreamOptions);
+    return finished(fromStream.pipe(writeStream));
+};
