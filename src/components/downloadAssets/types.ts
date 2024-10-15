@@ -21,6 +21,23 @@ export interface IMoment {
     uid: string;
 }
 
+// /** ThisLife Download API failure response json. Is only used when download fails; otherwise response body is file. */
+// interface IThisLifeDownloadFailureResponseJson {
+//     body: {
+//         /** Known good values: `null`. */
+//         errors: any;
+//         id: string;
+//         result: {
+//             /** Known good values: `['Moment not found.']`. */
+//             errors: string[];
+//             /** Known good values: `'Moment not found.'`. */
+//             message: string;
+//             payload: null;
+//             success: false;
+//         };
+//     };
+// }
+
 /** ThisLife JSON API response json. Has a discriminated union where `result.success` determines `result.payload`. */
 export interface IThisLifeJsonResponseJson<TSuccessPayload> {
     /** Known good values: `null`. */
