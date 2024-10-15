@@ -15,13 +15,13 @@ export interface IDownloadAsyncParameters {
     /** URL of a resource to be downloaded. */
     fromUrl: Parameters<typeof fetch>[0];
     /** Whether or not to create the destination directory (aka `toDirectory`) if it does not already exist. */
-    shouldMakeDirectory: IWriteStreamToFileAsyncParameters['shouldMakeDirectory'];
+    shouldMakeDirectory?: IWriteStreamToFileAsyncParameters['shouldMakeDirectory'];
     /** Destination directory for downloaded resource. */
-    toDirectory: IWriteStreamToFileAsyncParameters['toDirectory'];
+    toDirectory?: IWriteStreamToFileAsyncParameters['toDirectory'];
     /** Name for downloaded resource. Defaults to `Content-Disposition` file name in response headers. */
     toFileName?: string | ((contentDispositionFileName: ReturnType<typeof getFileNameFromContentDispositionHeader>) => string);
     /** `options` passed to `createWriteStream(path, options)` for writing a file. May include `flags`. */
-    writeStreamOptions: IWriteStreamToFileAsyncParameters['writeStreamOptions'];
+    writeStreamOptions?: IWriteStreamToFileAsyncParameters['writeStreamOptions'];
 }
 
 /**
