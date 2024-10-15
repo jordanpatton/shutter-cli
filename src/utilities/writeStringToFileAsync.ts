@@ -10,7 +10,7 @@ export interface IWriteStringToFileAsyncParameters {
     shouldMakeDirectory?: boolean;
     /** Destination directory for written file. */
     toDirectory: TPathLike;
-    /** File name for written file. */
+    /** File name (base name + extension) for written file. */
     toFileName: string;
     /**
      * `node:fs/promises.writeFile` options. `writeFileOptions` must specify a string-compatible `encoding`, or else the

@@ -2,11 +2,7 @@ import { Readable } from 'node:stream';
 import { ReadableStream as IReadableStream } from 'node:stream/web';
 
 import { getFileNameFromContentDispositionHeader } from './getFileNameFromContentDispositionHeader.js';
-import {
-    DEFAULT_NEW_FILE_NAME,
-    IWriteStreamToFileAsyncParameters,
-    writeStreamToFileAsync,
-} from './writeStreamToFileAsync.js';
+import { IWriteStreamToFileAsyncParameters, writeStreamToFileAsync } from './writeStreamToFileAsync.js';
 
 /** `downloadAsync` parameters. */
 export interface IDownloadAsyncParameters {
@@ -20,9 +16,14 @@ export interface IDownloadAsyncParameters {
     shouldMakeDirectory?: IWriteStreamToFileAsyncParameters['shouldMakeDirectory'];
     /** Destination directory for downloaded resource. */
     toDirectory?: IWriteStreamToFileAsyncParameters['toDirectory'];
-    /** Name for downloaded resource. Defaults to `Content-Disposition` file name in response headers. */
-    toFileName?: string | ((contentDispositionFileName: ReturnType<typeof getFileNameFromContentDispositionHeader>) => string);
+    /** File name (base name + extension) for downloaded resource. Defaults to `Content-Disposition` file name in response headers. */
+    toFileName?: IWriteStreamToFileAsyncParameters['toFileName'] | ((contentDispositionFileName: ReturnType<typeof getFileNameFromContentDispositionHeader>) => IWriteStreamToFileAsyncParameters['toFileName']);
 }
+
+/** Default directory for downloaded files. */
+const DEFAULT_DOWNLOAD_DIRECTORY = '.';
+/** Default file name (base name + extension) for a downloaded file. */
+export const DEFAULT_DOWNLOAD_FILE_NAME = 'untitled';
 
 /**
  * Downloads `fetchUrl` and writes it to `toDirectory` + `toFileName`. `async`-compatible.
@@ -35,8 +36,8 @@ export const downloadAsync = async ({
     fetchOptions,
     fromUrl,
     shouldMakeDirectory,
-    toDirectory,
-    toFileName,
+    toDirectory = DEFAULT_DOWNLOAD_DIRECTORY,
+    toFileName = DEFAULT_DOWNLOAD_FILE_NAME,
 }: IDownloadAsyncParameters): Promise<void> => {
     // Request file.
     const response = await fetch(fromUrl, fetchOptions);
@@ -54,7 +55,7 @@ export const downloadAsync = async ({
         ? toFileName(contentDispositionFileName)
         : typeof contentDispositionFileName === 'string'
         ? contentDispositionFileName
-        : DEFAULT_NEW_FILE_NAME;
+        : DEFAULT_DOWNLOAD_FILE_NAME;
     // Write file.
     return writeStreamToFileAsync({
         createWriteStreamOptions,

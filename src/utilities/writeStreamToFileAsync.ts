@@ -4,11 +4,6 @@ import { resolve } from 'node:path';
 import { Readable } from 'node:stream';
 import { finished } from 'node:stream/promises';
 
-/** Default directory for a newly-written file. */
-const DEFAULT_NEW_FILE_DIRECTORY = '.';
-/** Default file name (i.e., base name + extension) for a newly-written file. */
-export const DEFAULT_NEW_FILE_NAME = 'untitled';
-
 /** `writeStreamToFileAsync` parameters. */
 export interface IWriteStreamToFileAsyncParameters {
     /** `node:fs.createWriteStream` options. May include `flags`. */
@@ -18,9 +13,9 @@ export interface IWriteStreamToFileAsyncParameters {
     /** Whether or not to create the destination directory (aka `toDirectory`) if it does not already exist. */
     shouldMakeDirectory?: boolean;
     /** Destination directory for written file. */
-    toDirectory?: TPathLike;
-    /** File name for written file. */
-    toFileName?: string;
+    toDirectory: TPathLike;
+    /** File name (base name + extension) for written file. */
+    toFileName: string;
 }
 
 /**
@@ -38,8 +33,8 @@ export const writeStreamToFileAsync = async ({
     createWriteStreamOptions = { flags: 'wx' },
     fromStream,
     shouldMakeDirectory = false,
-    toDirectory = DEFAULT_NEW_FILE_DIRECTORY,
-    toFileName = DEFAULT_NEW_FILE_NAME,
+    toDirectory,
+    toFileName,
 }: IWriteStreamToFileAsyncParameters): Promise<void> => {
     // Determine path (directory + file name).
     if (shouldMakeDirectory && !existsSync(toDirectory)) {
