@@ -37,6 +37,9 @@ const fetchSkeletonViaApi = async (
         body: `{"method":"getSkeleton","params":[${stringifiedBodyParams.join(',')}],"headers":{"X-SFLY-SubSource":"library"},"id":null}`,
         method: 'POST'
     });
+    if (!response.ok) {
+        throw new Error(`[${response.status}] ${response.statusText}`);
+    }
     const responseJson: TGetSkeletonResponseJson = await response.json();
     // HTTP response code may be 200, but response body can still indicate failure.
     if (!responseJson.result.success) {

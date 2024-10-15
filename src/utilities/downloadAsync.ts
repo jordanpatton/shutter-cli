@@ -40,6 +40,9 @@ export const downloadAsync = async ({
 }: IDownloadAsyncParameters): Promise<void> => {
     // Request file.
     const response = await fetch(fromUrl, fetchOptions);
+    if (!response.ok) {
+        throw new Error(`[${response.status}] ${response.statusText}`);
+    }
     if (response.body === null) {
         throw new Error('Response body is null.');
     }
