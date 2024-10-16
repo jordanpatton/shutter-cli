@@ -1,15 +1,12 @@
 import { existsSync } from 'node:fs';
 
 import { getCommandLineParameter } from '../../utilities/getCommandLineParameter.js';
-import { authenticate } from '../authenticate/index.js';
 import { downloadAssetsSerial } from './components/downloadAssetsSerial.js';
 import { fetchMoments } from './components/fetchMoments.js';
 import { fetchSkeleton } from './components/fetchSkeleton.js';
 
 /** `downloadAssets` parameters. */
 interface IDownloadAssetsParameters {
-    /** Identification token from Amazon Cognito authentication service. */
-    cognitoIdToken?: string;
     /** Fixed delay between downloads in integer milliseconds. */
     downloadDelayFixedMilliseconds?: number;
     /** Jittered delay between downloads in integer milliseconds. */
@@ -32,16 +29,6 @@ interface IDownloadAssetsParameters {
  */
 export const parseDownloadAssetsParameters = (): IDownloadAssetsParameters => {
     const parsed: IDownloadAssetsParameters = {};
-    // cognito-id-token (optional): non-empty string
-    const cognitoIdToken = getCommandLineParameter('--cognito-id-token').value;
-    if (typeof cognitoIdToken === 'string') {
-        if (cognitoIdToken.length) {
-            parsed.cognitoIdToken = cognitoIdToken;
-            console.log('Parsed cognito-id-token from command line.');
-        } else {
-            throw new TypeError('cognito-id-token (optional) must be a non-empty string.');
-        }
-    }
     // download-delay-fixed-milliseconds (optional): positive integer
     const downloadDelayFixedMilliseconds = getCommandLineParameter('--download-delay-fixed-milliseconds').value;
     if (typeof downloadDelayFixedMilliseconds === 'string') {
@@ -107,17 +94,12 @@ export const parseDownloadAssetsParameters = (): IDownloadAssetsParameters => {
  * @returns Promisified void. Settles when workflow is done.
  */
 export const downloadAssets = async ({
-    cognitoIdToken: givenCognitoIdToken,
     downloadDelayFixedMilliseconds,
     downloadDelayJitterMilliseconds,
     downloadToDirectory,
     endTimeUnixSeconds: givenEndTimeUnixSeconds,
     startTimeUnixSeconds: givenStartTimeUnixSeconds,
 }: IDownloadAssetsParameters): Promise<void> => {
-    const cognitoIdToken = typeof givenCognitoIdToken === 'string'
-        ? givenCognitoIdToken
-        : await authenticate({ isVerbose: true });
-
     console.log('\nDetermining time range...');
     console.group();
     let startTimeUnixSeconds: number;
@@ -128,7 +110,7 @@ export const downloadAssets = async ({
         console.log('Skipping skeleton and using given time range.');
     } else {
         console.log('Fetching skeleton...');
-        const o = await fetchSkeleton(cognitoIdToken);
+        const o = await fetchSkeleton();
         if (typeof o === 'undefined') {
             console.log('Terminating due to empty skeleton.');
             return;
@@ -154,14 +136,13 @@ export const downloadAssets = async ({
 
     console.log('\nBuilding list of downloadable assets...');
     console.group();
-    const moments = await fetchMoments(cognitoIdToken, startTimeUnixSeconds, endTimeUnixSeconds);
+    const moments = await fetchMoments(startTimeUnixSeconds, endTimeUnixSeconds);
     console.groupEnd();
     console.log('...done!');
 
     console.log(`\nDownloading ${moments.length} assets...`);
     console.group();
     await downloadAssetsSerial(
-        cognitoIdToken,
         moments,
         downloadToDirectory,
         downloadDelayFixedMilliseconds,

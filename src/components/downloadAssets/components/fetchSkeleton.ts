@@ -1,3 +1,4 @@
+import { authenticate } from '../../authenticate/index.js';
 import { THISLIFE_JSON_URL } from '../constants.js';
 import { IThisLifeJsonResponseJson } from '../types.js';
 
@@ -52,12 +53,9 @@ const fetchSkeletonViaApi = async (
 /**
  * Fetches a skeleton via API and derives a time range from the payload.
  * 
- * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
  * @returns Promisified object with fields derived from skeleton OR void if skeleton is empty. Settles when data is ready.
  */
-export const fetchSkeleton = async (
-    cognitoIdToken: string,
-): Promise<{
+export const fetchSkeleton = async (): Promise<{
     /** Earliest date string in skeleton items. */
     earliestDateString: string;
     /** Derived end time in seconds since Unix epoch. */
@@ -69,6 +67,7 @@ export const fetchSkeleton = async (
     /** Derived start time in seconds since Unix epoch. */
     startTimeUnixSeconds: number;
 } | void> => {
+    const cognitoIdToken = await authenticate({ isVerbose: false });
     const { momentCount, skeleton } = await fetchSkeletonViaApi(cognitoIdToken);
     if (!Array.isArray(skeleton) || !skeleton.length) {
         console.log('Request succeeded, but skeleton is empty.');

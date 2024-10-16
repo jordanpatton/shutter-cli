@@ -1,3 +1,4 @@
+import { authenticate } from '../../authenticate/index.js';
 import {
     DEFAULT_DOWNLOAD_FILE_NAME,
     downloadAsync,
@@ -15,7 +16,6 @@ const THISLIFE_DOWNLOAD_URL = 'https://io.thislife.com/download';
  * Downloads assets corresponding to given list of moments in serial (i.e., no parallel
  * downloads) with interstitial delay and jitter to avoid overwhelming the server.
  * 
- * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
  * @param moments - Shutterfly moments.
  * @param toDirectory - Destination directory for downloaded assets.
  * @param delayFixedMilliseconds - Fixed delay between downloads in integer milliseconds.
@@ -25,12 +25,12 @@ const THISLIFE_DOWNLOAD_URL = 'https://io.thislife.com/download';
  * @see https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
  */
 export const downloadAssetsSerial = async (
-    cognitoIdToken: string,
     moments: IMoment[],
     toDirectory: IDownloadAsyncParameters['toDirectory'] = DEFAULT_DOWNLOAD_DIRECTORY,
     delayFixedMilliseconds: number = 2000,
     delayJitterMilliseconds: number = 1000,
 ): Promise<void> => {
+    const cognitoIdToken = await authenticate({ isVerbose: false });
     for (let i = 0, j = moments.length; i < j; i++) {
         if (i > 0) {
             const delayMilliseconds = delayFixedMilliseconds + generateRandomInteger(0, delayJitterMilliseconds);

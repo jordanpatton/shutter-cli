@@ -17,8 +17,8 @@ npm run build && npm run start
 npm run build
 # Download all assets from a Shutterfly account.
 npm run start -- --command download-assets
-# Download assets to a specific directory using an existing login session.
-npm run start -- --command download-assets --cognito-id-token "YOUR TOKEN HERE" --download-to-directory "/path/to/directory"
+# Download assets to a specific directory.
+npm run start -- --command download-assets --download-to-directory "/path/to/directory"
 # Download assets between two dates with a longer delay between downloads.
 npm run start -- --command download-assets --start-time 2023-01-01 --end-time 2023-12-31 --download-delay-fixed-milliseconds 5000 --download-delay-jitter-milliseconds 2000
 # Manually run a command without npm scripts.

@@ -1,3 +1,4 @@
+import { authenticate } from '../../authenticate/index.js';
 import { THISLIFE_JSON_URL } from '../constants.js';
 import { IMoment, IThisLifeJsonResponseJson } from '../types.js';
 
@@ -76,7 +77,6 @@ const fetchPaginatedMomentsViaApi = async (
 /**
  * Fetches all moments for a given time range.
  * 
- * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
  * @param startTimeUnixSeconds - Start of time range in seconds since Unix epoch.
  * @param endTimeUnixSeconds - End of time range in seconds since Unix epoch.
  * @returns Promisified array of moments. Settles when data is ready.
@@ -84,10 +84,10 @@ const fetchPaginatedMomentsViaApi = async (
  * @see https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
  */
 export const fetchMoments = async (
-    cognitoIdToken: string,
     startTimeUnixSeconds: number,
     endTimeUnixSeconds: number,
 ): Promise<IMoment[]> => {
+    const cognitoIdToken = await authenticate({ isVerbose: false });
     let accumulatedMoments: IMoment[] = [];
     let previousOldestMomentTimestamp: number | undefined;
     for (let i = 0; true; i++) {
