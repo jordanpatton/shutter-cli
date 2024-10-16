@@ -1,11 +1,11 @@
 import { launch } from 'puppeteer';
 
 import { repeatAsync } from '../../../utilities/repeatAsync.js';
+import { ISession } from '../types.js';
+import { getCognitoIdToken } from './getCognitoIdToken.js';
 
 const BROWSER_INITIAL_HEIGHT_PIXELS = 768;
 const BROWSER_INITIAL_WIDTH_PIXELS = 1024;
-const COGNITO_COOKIE_NAME_ID_TOKEN_POSTFIX = '.idToken';
-const COGNITO_COOKIE_NAME_PREFIX = 'CognitoIdentityServiceProvider.';
 const SHUTTERFLY_COOKIES_URL = 'https://accounts.shutterfly.com/cookies.html';
 const SHUTTERFLY_LOGIN_URL = 'https://accounts.shutterfly.com';
 const SHUTTERFLY_LOGIN_URL_WITH_COOKIES_REDIRECT = `${SHUTTERFLY_LOGIN_URL}/?redirectUri=${encodeURIComponent(SHUTTERFLY_COOKIES_URL)}`;
@@ -17,9 +17,9 @@ const SHUTTERFLY_LOGIN_URL_WITH_COOKIES_REDIRECT = `${SHUTTERFLY_LOGIN_URL}/?red
  * @returns Promisified identification token from Amazon Cognito authentication service.
  *          Settles when puppeteer script is done.
  */
-export const logIn = async (): Promise<string | undefined> => {
-    /** Cognito idToken. */
-    let cognitoIdToken: string | undefined;
+export const logIn = async (): Promise<ISession | undefined> => {
+    /** Result. */
+    let result: ISession | undefined;
     /** Whether or not the puppeteer script has completed its operations. */
     let puppeteerScriptIsFinished = false;
     /** Whether or not we should continue polling for cookies. */
@@ -51,9 +51,10 @@ export const logIn = async (): Promise<string | undefined> => {
     await repeatAsync(async (stopSignal) => {
         console.log('Polling for Cognito cookies...');
         const cookies = await page.cookies();
-        cognitoIdToken = cookies.find(v => v.name.startsWith(COGNITO_COOKIE_NAME_PREFIX) && v.name.endsWith(COGNITO_COOKIE_NAME_ID_TOKEN_POSTFIX))?.value;
-        if (typeof cognitoIdToken === 'string' && cognitoIdToken.length) {
+        const cognitoIdToken = getCognitoIdToken(cookies);
+        if (typeof cognitoIdToken === 'string') {
             console.log('Found Cognito idToken!');
+            result = { cookies, startTimeUnixMilliseconds: Date.now() };
             shouldContinuePollingForCookies = false; // stop polling for cookies
         }
         if (!shouldContinuePollingForCookies) {
@@ -63,5 +64,5 @@ export const logIn = async (): Promise<string | undefined> => {
 
     puppeteerScriptIsFinished = true;
     await browser.close();
-    return cognitoIdToken;
+    return result;
 };

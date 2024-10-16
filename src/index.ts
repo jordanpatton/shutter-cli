@@ -1,3 +1,4 @@
+import { authenticate, parseAuthenticateParameters } from './components/authenticate/index.js';
 import { downloadAssets, parseDownloadAssetsParameters } from './components/downloadAssets/index.js';
 import { getCommandLineParameter } from './utilities/getCommandLineParameter.js';
 
@@ -6,10 +7,12 @@ import { getCommandLineParameter } from './utilities/getCommandLineParameter.js'
  * 
  * @returns Return value from command or void.
  */
-export const main = (): ReturnType<typeof downloadAssets> | void => {
+export const main = (): ReturnType<typeof authenticate> | ReturnType<typeof downloadAssets> | void => {
     const command = getCommandLineParameter('--command').value;
     if (typeof command === 'string') {
         switch (command) {
+            case 'authenticate':
+                return authenticate(parseAuthenticateParameters());
             case 'download-assets':
                 return downloadAssets(parseDownloadAssetsParameters());
             default:

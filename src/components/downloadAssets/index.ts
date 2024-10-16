@@ -1,10 +1,10 @@
 import { existsSync } from 'node:fs';
 
 import { getCommandLineParameter } from '../../utilities/getCommandLineParameter.js';
+import { authenticate } from '../authenticate/index.js';
 import { downloadAssetsSerial } from './components/downloadAssetsSerial.js';
 import { fetchMoments } from './components/fetchMoments.js';
 import { fetchSkeleton } from './components/fetchSkeleton.js';
-import { logIn } from './components/logIn.js';
 
 /** `downloadAssets` parameters. */
 interface IDownloadAssetsParameters {
@@ -114,24 +114,9 @@ export const downloadAssets = async ({
     endTimeUnixSeconds: givenEndTimeUnixSeconds,
     startTimeUnixSeconds: givenStartTimeUnixSeconds,
 }: IDownloadAssetsParameters): Promise<void> => {
-    console.log('\nAuthenticating...');
-    console.group();
-    let cognitoIdToken: string;
-    if (typeof givenCognitoIdToken === 'string') {
-        cognitoIdToken = givenCognitoIdToken;
-        console.log('Skipping Shutterfly login and using given Cognito idToken.');
-    } else {
-        console.log('Logging in to Shutterfly...');
-        const newCognitoIdToken = await logIn();
-        if (typeof newCognitoIdToken === 'string' && newCognitoIdToken.length) {
-            cognitoIdToken = newCognitoIdToken;
-            console.log(`Using Cognito idToken from Shutterfly:\n${newCognitoIdToken}`);
-        } else {
-            throw new Error('Failed to log in to Shutterfly.');
-        }
-    }
-    console.groupEnd();
-    console.log('...done!');
+    const cognitoIdToken = typeof givenCognitoIdToken === 'string'
+        ? givenCognitoIdToken
+        : await authenticate({ isVerbose: true });
 
     console.log('\nDetermining time range...');
     console.group();
