@@ -87,10 +87,10 @@ export const fetchMoments = async (
     startTimeUnixSeconds: number,
     endTimeUnixSeconds: number,
 ): Promise<IMoment[]> => {
-    const cognitoIdToken = await authenticate({ isVerbose: false });
     let accumulatedMoments: IMoment[] = [];
     let previousOldestMomentTimestamp: number | undefined;
     for (let i = 0; true; i++) {
+        const cognitoIdToken = await authenticate({ isVerbose: false });
         // Fetch a page of moments. Pagination occurs from newest to oldest, so end time is the only moving target.
         const payload = await fetchPaginatedMomentsViaApi(
             cognitoIdToken,

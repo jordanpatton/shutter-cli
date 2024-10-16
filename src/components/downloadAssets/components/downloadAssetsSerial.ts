@@ -30,7 +30,6 @@ export const downloadAssetsSerial = async (
     delayFixedMilliseconds: number = 2000,
     delayJitterMilliseconds: number = 1000,
 ): Promise<void> => {
-    const cognitoIdToken = await authenticate({ isVerbose: false });
     for (let i = 0, j = moments.length; i < j; i++) {
         if (i > 0) {
             const delayMilliseconds = delayFixedMilliseconds + generateRandomInteger(0, delayJitterMilliseconds);
@@ -39,6 +38,7 @@ export const downloadAssetsSerial = async (
             process.stdout.clearLine(0);
             process.stdout.cursorTo(0);
         }
+        const cognitoIdToken = await authenticate({ isVerbose: false });
         console.log(`Downloading asset ${i + 1} of ${moments.length} (moment ${moments[i].uid})...`);
         await downloadAsync({
             fromUrl: `${THISLIFE_DOWNLOAD_URL}?accessToken=${encodeURIComponent(cognitoIdToken)}&momentId=${encodeURIComponent(moments[i].uid)}&source=library`,
