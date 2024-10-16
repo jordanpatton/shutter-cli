@@ -21,7 +21,7 @@ export interface IDownloadAsyncParameters {
 }
 
 /** Default directory for downloaded files. */
-const DEFAULT_DOWNLOAD_DIRECTORY = '.';
+export const DEFAULT_DOWNLOAD_DIRECTORY = '.';
 /** Default file name (base name + extension) for a downloaded file. */
 export const DEFAULT_DOWNLOAD_FILE_NAME = 'untitled';
 
@@ -37,7 +37,7 @@ export const downloadAsync = async ({
     fromUrl,
     shouldMakeDirectory,
     toDirectory = DEFAULT_DOWNLOAD_DIRECTORY,
-    toFileName = DEFAULT_DOWNLOAD_FILE_NAME,
+    toFileName = (contentDispositionFileName) => contentDispositionFileName ?? DEFAULT_DOWNLOAD_FILE_NAME,
 }: IDownloadAsyncParameters): Promise<void> => {
     // Request file.
     const response = await fetch(fromUrl, fetchOptions);
@@ -49,13 +49,7 @@ export const downloadAsync = async ({
     }
     // Determine file name.
     const contentDispositionFileName = getFileNameFromContentDispositionHeader(response.headers.get('Content-Disposition'));
-    const _toFileName: string = typeof toFileName === 'string'
-        ? toFileName
-        : typeof toFileName === 'function'
-        ? toFileName(contentDispositionFileName)
-        : typeof contentDispositionFileName === 'string'
-        ? contentDispositionFileName
-        : DEFAULT_DOWNLOAD_FILE_NAME;
+    const _toFileName: string = typeof toFileName === 'string' ? toFileName : toFileName(contentDispositionFileName);
     // Write file.
     return writeStreamToFileAsync({
         createWriteStreamOptions,

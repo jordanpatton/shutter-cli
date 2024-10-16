@@ -8,6 +8,7 @@ import { getFileNameParts } from '../../../utilities/getFileNameParts.js';
 import { sleepAsync } from '../../../utilities/sleepAsync.js';
 import { IMoment } from '../types.js';
 
+const DEFAULT_DOWNLOAD_DIRECTORY = './ignore';
 const THISLIFE_DOWNLOAD_URL = 'https://io.thislife.com/download';
 
 /**
@@ -26,7 +27,7 @@ const THISLIFE_DOWNLOAD_URL = 'https://io.thislife.com/download';
 export const downloadAssetsSerial = async (
     cognitoIdToken: string,
     moments: IMoment[],
-    toDirectory: IDownloadAsyncParameters['toDirectory'] = '.',
+    toDirectory: IDownloadAsyncParameters['toDirectory'] = DEFAULT_DOWNLOAD_DIRECTORY,
     delayFixedMilliseconds: number = 2000,
     delayJitterMilliseconds: number = 1000,
 ): Promise<void> => {
