@@ -9,12 +9,13 @@ import { ISession } from '../types.js';
  * @returns Promisified session (or undefined if none exists).
  */
 export const readSessionFromFile = async (isVerbose: boolean = false): Promise<ISession | undefined> => {
+    const consoleLog = isVerbose ? console.log : () => {};
     let sessionString: string | undefined;
     try {
         sessionString = await readStringFromFileAsync({ fromPath: `${SESSION_DIRECTORY}/${SESSION_FILE_NAME}` });
-        if (isVerbose) {console.log('Successfully read session from file.');}
+        consoleLog('Successfully read session from file.');
     } catch (_error) {
-        if (isVerbose) {console.log('Failed to read session from file.');}
+        consoleLog('Failed to read session from file.');
         return undefined;
     }
     return typeof sessionString === 'string' ? JSON.parse(sessionString) as ISession : undefined;

@@ -13,14 +13,15 @@ const SESSION_TIME_TO_LIVE_MILLISECONDS = 1000 * 60 * 60; // 1 hour
  * @returns True if a given session is valid; otherwise false.
  */
 export const validateSession = (session: ISession, isVerbose: boolean = false): boolean => {
+    const consoleLog = isVerbose ? console.log : () => {};
     const discountedTtlMs = SESSION_TIME_TO_LIVE_MILLISECONDS - SESSION_TIME_TO_LIVE_DISCOUNT_MILLISECONDS;
     const elapsedMs = Date.now() - session.startTimeUnixMilliseconds;
     const remainingMs = discountedTtlMs - elapsedMs;
     if (remainingMs > 0) {
-        if (isVerbose) {console.log(`Session is valid with ${remainingMs} milliseconds remaining.`);}
+        consoleLog(`Session is valid with ${remainingMs} milliseconds remaining.`);
         return true;
     } else {
-        if (isVerbose) {console.log(`Session is stale by ${Math.abs(remainingMs)} milliseconds.`);}
+        consoleLog(`Session is stale by ${Math.abs(remainingMs)} milliseconds.`);
         return false;
     }
 };
