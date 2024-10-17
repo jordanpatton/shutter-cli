@@ -1,4 +1,4 @@
-import { readStringFromFileAsync } from '../../../utilities/readStringFromFileAsync.js';
+import { readStringFromFileAsync } from '../../../../../utilities/readStringFromFileAsync.js';
 import { SESSION_DIRECTORY, SESSION_FILE_NAME } from '../constants.js';
 import { ISession } from '../types.js';
 

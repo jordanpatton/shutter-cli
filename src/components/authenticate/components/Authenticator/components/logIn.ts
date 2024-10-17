@@ -1,6 +1,6 @@
 import { launch } from 'puppeteer';
 
-import { repeatAsync } from '../../../utilities/repeatAsync.js';
+import { repeatAsync } from '../../../../../utilities/repeatAsync.js';
 import { ISession } from '../types.js';
 import { getCognitoIdToken } from './getCognitoIdToken.js';
 

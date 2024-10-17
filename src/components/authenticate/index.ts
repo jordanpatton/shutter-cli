@@ -1,10 +1,5 @@
 import { getCommandLineParameter } from '../../utilities/getCommandLineParameter.js';
-import { writeStringToFileAsync } from '../../utilities/writeStringToFileAsync.js';
-import { getCognitoIdToken } from './components/getCognitoIdToken.js';
-import { logIn } from './components/logIn.js';
-import { readSessionFromFile } from './components/readSessionFromFile.js';
-import { validateSession } from './components/validateSession.js';
-import { SESSION_DIRECTORY, SESSION_FILE_NAME } from './constants.js';
+import { Authenticator } from './components/Authenticator/index.js';
 
 /** `authenticate` parameters. */
 interface IAuthenticateParameters {
@@ -36,46 +31,15 @@ export const parseAuthenticateParameters = (): IAuthenticateParameters => {
  * Establishes an authenticated, validated session.
  * 
  * @param parameters - Parameters.
- * @returns Promisified Amazon Cognito idToken. Settles when data is ready.
+ * @returns Promisified object with `Authenticator` instance and Cognito idToken. Settles when fields are ready.
  */
-export const authenticate = async ({ isVerbose = false }: IAuthenticateParameters): Promise<string> => {
-    if (isVerbose) {console.log('\nChecking existing session...');}
-    if (isVerbose) {console.group();}
-    const oldSession = await readSessionFromFile(isVerbose);
-    if (typeof oldSession !== 'undefined' && validateSession(oldSession, isVerbose)) {
-        const oldCognitoIdToken = getCognitoIdToken(oldSession.cookies);
-        if (typeof oldCognitoIdToken === 'string') {
-            return oldCognitoIdToken;
-        } else {
-            throw new Error('Existing Cognito idToken is invalid.');
-        }
-    }
-    if (isVerbose) {console.groupEnd();}
-    if (isVerbose) {console.log('...done!');}
-
-    if (isVerbose) {console.log('\nLogging in to Shutterfly...');}
-    if (isVerbose) {console.group();}
-    const newSession = await logIn();
-    if (typeof newSession === 'undefined') {
-        throw new Error('Failed to log in to Shutterfly.');
-    }
-    if (isVerbose) {console.groupEnd();}
-    if (isVerbose) {console.log('...done!');}
-
-    if (isVerbose) {console.log('\nWriting session to file...');}
-    if (isVerbose) {console.group();}
-    await writeStringToFileAsync({
-        fromString: JSON.stringify(newSession, null, 4),
-        toDirectory: SESSION_DIRECTORY,
-        toFileName: SESSION_FILE_NAME,
-    });
-    if (isVerbose) {console.groupEnd();}
-    if (isVerbose) {console.log('...done!');}
-
-    const newCognitoIdToken = getCognitoIdToken(newSession.cookies);
-    if (typeof newCognitoIdToken === 'string') {
-        return newCognitoIdToken;
-    } else {
-        throw new Error('New Cognito idToken is invalid.');
-    }
+export const authenticate = async ({
+    isVerbose = false,
+}: IAuthenticateParameters): Promise<{
+    authenticator: Authenticator;
+    cognitoIdToken: string;
+}> => {
+    const authenticator = new Authenticator();
+    const cognitoIdToken = await authenticator.authenticate(isVerbose);
+    return { authenticator, cognitoIdToken };
 };
