@@ -5,20 +5,24 @@ import { getCommandLineParameter } from '../../utilities/getCommandLineParameter
 import { downloadAssetsSerial } from './components/downloadAssetsSerial.js';
 import { fetchMoments } from './components/fetchMoments.js';
 import { fetchSkeleton } from './components/fetchSkeleton.js';
-import { DEFAULT_DOWNLOAD_DIRECTORY } from './constants.js';
+import {
+    DEFAULT_DELAY_FIXED_MILLISECONDS,
+    DEFAULT_DELAY_JITTER_MILLISECONDS,
+    DEFAULT_TO_DIRECTORY,
+} from './constants.js';
 
 /** `downloadAssets` parameters. */
 interface IDownloadAssetsParameters {
-    /** Fixed delay between downloads in integer milliseconds. */
-    downloadDelayFixedMilliseconds?: number;
-    /** Jittered delay between downloads in integer milliseconds. */
-    downloadDelayJitterMilliseconds?: number;
-    /** Destination directory for downloaded assets. */
-    downloadToDirectory?: string;
+    /** Fixed delay between serial requests in integer milliseconds. */
+    delayFixedMilliseconds?: number;
+    /** Jittered delay between serial requests in integer milliseconds. */
+    delayJitterMilliseconds?: number;
     /** End of time range in seconds since Unix epoch. */
     endTimeUnixSeconds?: number;
     /** Start of time range in seconds since Unix epoch. */
     startTimeUnixSeconds?: number;
+    /** Destination directory for downloaded assets. */
+    toDirectory?: string;
 }
 
 /**
@@ -31,37 +35,26 @@ interface IDownloadAssetsParameters {
  */
 export const parseDownloadAssetsParameters = (): IDownloadAssetsParameters => {
     const parsed: IDownloadAssetsParameters = {};
-    // download-delay-fixed-milliseconds (optional): positive integer
-    const downloadDelayFixedMilliseconds = getCommandLineParameter('--download-delay-fixed-milliseconds').value;
-    if (typeof downloadDelayFixedMilliseconds === 'string') {
-        const f = parseFloat(downloadDelayFixedMilliseconds);
+    // delay-fixed-milliseconds (optional): positive integer
+    const delayFixedMilliseconds = getCommandLineParameter('--delay-fixed-milliseconds').value;
+    if (typeof delayFixedMilliseconds === 'string') {
+        const f = parseFloat(delayFixedMilliseconds);
         if (!isNaN(f) && Number.isInteger(f) && f >= 0) {
-            parsed.downloadDelayFixedMilliseconds = f;
-            console.log('Parsed download-delay-fixed-milliseconds from command line.');
+            parsed.delayFixedMilliseconds = f;
+            console.log('Parsed delay-fixed-milliseconds from command line.');
         } else {
-            throw new TypeError('download-delay-fixed-milliseconds (optional) must be a positive integer.');
+            throw new TypeError('delay-fixed-milliseconds (optional) must be a positive integer.');
         }
     }
-    // download-delay-jitter-milliseconds (optional): positive integer
-    const downloadDelayJitterMilliseconds = getCommandLineParameter('--download-delay-jitter-milliseconds').value;
-    if (typeof downloadDelayJitterMilliseconds === 'string') {
-        const f = parseFloat(downloadDelayJitterMilliseconds);
+    // delay-jitter-milliseconds (optional): positive integer
+    const delayJitterMilliseconds = getCommandLineParameter('--delay-jitter-milliseconds').value;
+    if (typeof delayJitterMilliseconds === 'string') {
+        const f = parseFloat(delayJitterMilliseconds);
         if (!isNaN(f) && Number.isInteger(f) && f >= 0) {
-            parsed.downloadDelayJitterMilliseconds = f;
-            console.log('Parsed download-delay-jitter-milliseconds from command line.');
+            parsed.delayJitterMilliseconds = f;
+            console.log('Parsed delay-jitter-milliseconds from command line.');
         } else {
-            throw new TypeError('download-delay-jitter-milliseconds (optional) must be a positive integer.');
-        }
-    }
-    // download-to-directory (optional): existing directory
-    const downloadToDirectory = getCommandLineParameter('--download-to-directory').value;
-    if (typeof downloadToDirectory === 'string') {
-        // TODO: Check that the path points to a directory (not a file).
-        if (existsSync(downloadToDirectory)) {
-            parsed.downloadToDirectory = downloadToDirectory;
-            console.log('Parsed download-to-directory from command line.');
-        } else {
-            throw new TypeError('download-to-directory (optional) must be an existing directory.');
+            throw new TypeError('delay-jitter-milliseconds (optional) must be a positive integer.');
         }
     }
     // end-time (optional): new-Date-able expression
@@ -86,6 +79,17 @@ export const parseDownloadAssetsParameters = (): IDownloadAssetsParameters => {
             throw new TypeError('start-time (optional) must be a valid date/time expression.');
         }
     }
+    // to-directory (optional): existing directory
+    const toDirectory = getCommandLineParameter('--to-directory').value;
+    if (typeof toDirectory === 'string') {
+        // TODO: Check that the path points to a directory (not a file).
+        if (existsSync(toDirectory)) {
+            parsed.toDirectory = toDirectory;
+            console.log('Parsed to-directory from command line.');
+        } else {
+            throw new TypeError('to-directory (optional) must be an existing directory.');
+        }
+    }
     return parsed;
 };
 
@@ -96,9 +100,9 @@ export const parseDownloadAssetsParameters = (): IDownloadAssetsParameters => {
  * @returns Promisified void. Settles when workflow is done.
  */
 export const downloadAssets = async ({
-    downloadDelayFixedMilliseconds,
-    downloadDelayJitterMilliseconds,
-    downloadToDirectory = DEFAULT_DOWNLOAD_DIRECTORY,
+    delayFixedMilliseconds = DEFAULT_DELAY_FIXED_MILLISECONDS,
+    delayJitterMilliseconds = DEFAULT_DELAY_JITTER_MILLISECONDS,
+    toDirectory = DEFAULT_TO_DIRECTORY,
     endTimeUnixSeconds: givenEndTimeUnixSeconds,
     startTimeUnixSeconds: givenStartTimeUnixSeconds,
 }: IDownloadAssetsParameters): Promise<void> => {
@@ -144,7 +148,7 @@ export const downloadAssets = async ({
 
     console.log('\nFiltering out already-downloaded assets...');
     console.group();
-    const directoryEntries = await readdir(downloadToDirectory, { recursive: false, withFileTypes: true });
+    const directoryEntries = await readdir(toDirectory, { recursive: false, withFileTypes: true });
     const fileNames = directoryEntries.filter(v => v.isFile()).map(v => v.name);
     // We could extract the moment.uid from each file name with the following RegEx: /\(([^.]+)\)(?:\.[^.]+)+$/
     // Instead of doing that, it's much easier to just search the entire list of file names for each moment.uid.
@@ -157,9 +161,9 @@ export const downloadAssets = async ({
     console.group();
     await downloadAssetsSerial(
         filteredMoments,
-        downloadToDirectory,
-        downloadDelayFixedMilliseconds,
-        downloadDelayJitterMilliseconds
+        toDirectory,
+        delayFixedMilliseconds,
+        delayJitterMilliseconds
     );
     console.groupEnd();
     console.log('...done!');

@@ -18,15 +18,16 @@ npm run build
 # Download all assets from a Shutterfly account.
 npm run start -- --command download-assets
 # Download assets to a specific directory.
-npm run start -- --command download-assets --download-to-directory "/path/to/directory"
+npm run start -- --command download-assets --to-directory "/path/to/directory"
 # Download assets between two dates with a longer delay between downloads.
-npm run start -- --command download-assets --start-time 2023-01-01 --end-time 2023-12-31 --download-delay-fixed-milliseconds 5000 --download-delay-jitter-milliseconds 2000
+npm run start -- --command download-assets --start-time 2023-01-01 --end-time 2023-12-31 --delay-fixed-milliseconds 5000 --delay-jitter-milliseconds 2000
 # Manually run a command without npm scripts.
 node ./dist/index.js --command download-assets
 ```
 
 ## Repository Organization
 - `fixtures`: Sample requests, responses, and other data structures.
+- `ignore`: Git-ignored folder for transient data (cached sessions, downloaded files, etc.). If you download something and don't provide a destination directory, it will most likely end up here.
 - `src`: Business logic.
   - `components`: The component tree for this application containing large workflows, medium-sized tasks, and miniscule sub-tasks. This codebase favors composition over inheritance, and components may reference one another as needed. Structure changes to match relationships between components.
   - `utilities`: Tools that aren't specific to this application. (They typically have nothing to do with Shutterfly.) Utilities could be abstracted into their own codebase and imported to this one if needed.

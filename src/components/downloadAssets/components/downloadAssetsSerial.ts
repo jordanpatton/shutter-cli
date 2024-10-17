@@ -7,7 +7,6 @@ import {
 import { generateRandomInteger } from '../../../utilities/generateRandomInteger.js';
 import { getFileNameParts } from '../../../utilities/getFileNameParts.js';
 import { sleepAsync } from '../../../utilities/sleepAsync.js';
-import { DEFAULT_DOWNLOAD_DIRECTORY } from '../constants.js';
 import { IMoment } from '../types.js';
 
 const THISLIFE_DOWNLOAD_URL = 'https://io.thislife.com/download';
@@ -26,9 +25,9 @@ const THISLIFE_DOWNLOAD_URL = 'https://io.thislife.com/download';
  */
 export const downloadAssetsSerial = async (
     moments: IMoment[],
-    toDirectory: IDownloadAsyncParameters['toDirectory'] = DEFAULT_DOWNLOAD_DIRECTORY,
-    delayFixedMilliseconds: number = 2000,
-    delayJitterMilliseconds: number = 1000,
+    toDirectory: IDownloadAsyncParameters['toDirectory'],
+    delayFixedMilliseconds: number,
+    delayJitterMilliseconds: number,
 ): Promise<void> => {
     for (let i = 0, j = moments.length; i < j; i++) {
         if (i > 0) {
