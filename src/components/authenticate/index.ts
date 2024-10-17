@@ -28,7 +28,7 @@ export const parseAuthenticateParameters = (): IAuthenticateParameters => {
 };
 
 /**
- * Establishes an authenticated, validated session.
+ * Establishes an authenticated session.
  * 
  * @param parameters - Parameters.
  * @returns Promisified object with `Authenticator` instance and Cognito idToken. Settles when fields are ready.
