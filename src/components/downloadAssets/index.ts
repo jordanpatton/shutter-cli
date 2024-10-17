@@ -1,9 +1,11 @@
 import { existsSync } from 'node:fs';
+import { readdir } from 'node:fs/promises';
 
 import { getCommandLineParameter } from '../../utilities/getCommandLineParameter.js';
 import { downloadAssetsSerial } from './components/downloadAssetsSerial.js';
 import { fetchMoments } from './components/fetchMoments.js';
 import { fetchSkeleton } from './components/fetchSkeleton.js';
+import { DEFAULT_DOWNLOAD_DIRECTORY } from './constants.js';
 
 /** `downloadAssets` parameters. */
 interface IDownloadAssetsParameters {
@@ -96,7 +98,7 @@ export const parseDownloadAssetsParameters = (): IDownloadAssetsParameters => {
 export const downloadAssets = async ({
     downloadDelayFixedMilliseconds,
     downloadDelayJitterMilliseconds,
-    downloadToDirectory,
+    downloadToDirectory = DEFAULT_DOWNLOAD_DIRECTORY,
     endTimeUnixSeconds: givenEndTimeUnixSeconds,
     startTimeUnixSeconds: givenStartTimeUnixSeconds,
 }: IDownloadAssetsParameters): Promise<void> => {
@@ -140,10 +142,21 @@ export const downloadAssets = async ({
     console.groupEnd();
     console.log('...done!');
 
-    console.log(`\nDownloading ${moments.length} assets...`);
+    console.log('\nFiltering out already-downloaded assets...');
+    console.group();
+    const directoryEntries = await readdir(downloadToDirectory, { recursive: false, withFileTypes: true });
+    const fileNames = directoryEntries.filter(v => v.isFile()).map(v => v.name);
+    // We could extract the moment.uid from each file name with the following RegEx: /\(([^.]+)\)(?:\.[^.]+)+$/
+    // Instead of doing that, it's much easier to just search the entire list of file names for each moment.uid.
+    const filteredMoments = moments.filter(v => !fileNames.some(w => w.includes(v.uid)));
+    console.log(`Filtered out ${moments.length - filteredMoments.length} with ${filteredMoments.length} remaining.`);
+    console.groupEnd();
+    console.log('...done!');
+
+    console.log(`\nDownloading ${filteredMoments.length} assets...`);
     console.group();
     await downloadAssetsSerial(
-        moments,
+        filteredMoments,
         downloadToDirectory,
         downloadDelayFixedMilliseconds,
         downloadDelayJitterMilliseconds
