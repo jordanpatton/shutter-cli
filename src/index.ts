@@ -16,7 +16,7 @@ export const main = (): ReturnType<typeof authenticate> | ReturnType<typeof down
             case 'download-assets':
                 return downloadAssets(parseDownloadAssetsParameters());
             default:
-                throw new RangeError('command (required) must be one of: download-assets.');
+                throw new RangeError('command (required) must be one of: authenticate, download-assets.');
         };
     } else {
         throw new TypeError('command (required) must be a non-empty string.');
