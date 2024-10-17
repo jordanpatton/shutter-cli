@@ -67,7 +67,7 @@ export const fetchSkeleton = async (): Promise<{
     /** Derived start time in seconds since Unix epoch. */
     startTimeUnixSeconds: number;
 } | void> => {
-    const cognitoIdToken = await authenticate({ isVerbose: false });
+    const { cognitoIdToken } = await authenticate({ isVerbose: false });
     const { momentCount, skeleton } = await fetchSkeletonViaApi(cognitoIdToken);
     if (!Array.isArray(skeleton) || !skeleton.length) {
         console.log('Request succeeded, but skeleton is empty.');

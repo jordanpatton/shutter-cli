@@ -98,7 +98,7 @@ export const fetchMoments = async (
         if (i > 0) {
             await sleepAsync(delayFixedMilliseconds, delayJitterMilliseconds, (ms) => `Waiting ${ms} milliseconds...`);
         }
-        const cognitoIdToken = await authenticate({ isVerbose: false });
+        const { cognitoIdToken } = await authenticate({ isVerbose: false });
         // Fetch a page of moments. Pagination occurs from newest to oldest, so end time is the only moving target.
         const payload = await fetchPaginatedMomentsViaApi(
             cognitoIdToken,
