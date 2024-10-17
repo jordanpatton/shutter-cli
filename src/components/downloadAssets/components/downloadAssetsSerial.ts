@@ -1,12 +1,11 @@
-import { authenticate } from '../../authenticate/index.js';
 import {
     DEFAULT_DOWNLOAD_FILE_NAME,
     downloadAsync,
     IDownloadAsyncParameters,
 } from '../../../utilities/downloadAsync.js';
-import { generateRandomInteger } from '../../../utilities/generateRandomInteger.js';
 import { getFileNameParts } from '../../../utilities/getFileNameParts.js';
 import { sleepAsync } from '../../../utilities/sleepAsync.js';
+import { authenticate } from '../../authenticate/index.js';
 import { IMoment } from '../types.js';
 
 const THISLIFE_DOWNLOAD_URL = 'https://io.thislife.com/download';
@@ -31,11 +30,7 @@ export const downloadAssetsSerial = async (
 ): Promise<void> => {
     for (let i = 0, j = moments.length; i < j; i++) {
         if (i > 0) {
-            const delayMilliseconds = delayFixedMilliseconds + generateRandomInteger(0, delayJitterMilliseconds);
-            process.stdout.write(`Waiting ${delayMilliseconds} milliseconds...`);
-            await sleepAsync(delayMilliseconds);
-            process.stdout.clearLine(0);
-            process.stdout.cursorTo(0);
+            await sleepAsync(delayFixedMilliseconds, delayJitterMilliseconds, (ms) => `Waiting ${ms} milliseconds...`);
         }
         const cognitoIdToken = await authenticate({ isVerbose: false });
         console.log(`Downloading asset ${i + 1} of ${moments.length} (moment ${moments[i].uid})...`);

@@ -1,3 +1,4 @@
+import { sleepAsync } from '../../../utilities/sleepAsync.js';
 import { authenticate } from '../../authenticate/index.js';
 import { THISLIFE_JSON_URL } from '../constants.js';
 import { IMoment, IThisLifeJsonResponseJson } from '../types.js';
@@ -79,6 +80,8 @@ const fetchPaginatedMomentsViaApi = async (
  * 
  * @param startTimeUnixSeconds - Start of time range in seconds since Unix epoch.
  * @param endTimeUnixSeconds - End of time range in seconds since Unix epoch.
+ * @param delayFixedMilliseconds - Fixed delay between requests in integer milliseconds.
+ * @param delayJitterMilliseconds - Jittered delay between requests in integer milliseconds.
  * @returns Promisified array of moments. Settles when data is ready.
  * 
  * @see https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
@@ -86,10 +89,15 @@ const fetchPaginatedMomentsViaApi = async (
 export const fetchMoments = async (
     startTimeUnixSeconds: number,
     endTimeUnixSeconds: number,
+    delayFixedMilliseconds: number,
+    delayJitterMilliseconds: number,
 ): Promise<IMoment[]> => {
     let accumulatedMoments: IMoment[] = [];
     let previousOldestMomentTimestamp: number | undefined;
     for (let i = 0; true; i++) {
+        if (i > 0) {
+            await sleepAsync(delayFixedMilliseconds, delayJitterMilliseconds, (ms) => `Waiting ${ms} milliseconds...`);
+        }
         const cognitoIdToken = await authenticate({ isVerbose: false });
         // Fetch a page of moments. Pagination occurs from newest to oldest, so end time is the only moving target.
         const payload = await fetchPaginatedMomentsViaApi(

@@ -142,7 +142,12 @@ export const downloadAssets = async ({
 
     console.log('\nBuilding list of downloadable assets...');
     console.group();
-    const moments = await fetchMoments(startTimeUnixSeconds, endTimeUnixSeconds);
+    const moments = await fetchMoments(
+        startTimeUnixSeconds,
+        endTimeUnixSeconds,
+        delayFixedMilliseconds,
+        delayJitterMilliseconds
+    );
     console.groupEnd();
     console.log('...done!');
 
