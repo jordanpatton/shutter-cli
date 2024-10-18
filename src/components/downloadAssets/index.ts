@@ -111,6 +111,7 @@ export const downloadAssets = async ({
     // each request in this workflow. Subsequent authentications will hit the in-memory cache until it expires. We must
     // pass it to helper functions as `() => authenticator.authenticate()` instead of `authenticator.authenticate`
     // because the latter has a `this`-binding issue due to it being an instance method.
+    // @see https://stackoverflow.com/questions/45643005/why-is-this-undefined-in-this-class-method
     const { authenticator } = await authenticate({ isVerbose: true });
 
     console.log('\nDetermining time range...');
