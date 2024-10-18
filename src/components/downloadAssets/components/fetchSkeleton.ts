@@ -1,4 +1,3 @@
-import { authenticate } from '../../authenticate/index.js';
 import { THISLIFE_JSON_URL } from '../constants.js';
 import { IThisLifeJsonResponseJson } from '../types.js';
 
@@ -53,9 +52,12 @@ const fetchSkeletonViaApi = async (
 /**
  * Fetches a skeleton via API and derives a time range from the payload.
  * 
+ * @param cognitoIdToken - Function or string for obtaining a Cognito idToken.
  * @returns Promisified object with fields derived from skeleton OR void if skeleton is empty. Settles when data is ready.
  */
-export const fetchSkeleton = async (): Promise<{
+export const fetchSkeleton = async (
+    cognitoIdToken: (() => Promise<string>) | string,
+): Promise<{
     /** Earliest date string in skeleton items. */
     earliestDateString: string;
     /** Derived end time in seconds since Unix epoch. */
@@ -67,8 +69,8 @@ export const fetchSkeleton = async (): Promise<{
     /** Derived start time in seconds since Unix epoch. */
     startTimeUnixSeconds: number;
 } | void> => {
-    const { cognitoIdToken } = await authenticate({ isVerbose: false });
-    const { momentCount, skeleton } = await fetchSkeletonViaApi(cognitoIdToken);
+    const _cognitoIdToken: string = typeof cognitoIdToken === 'function' ? await cognitoIdToken() : cognitoIdToken;
+    const { momentCount, skeleton } = await fetchSkeletonViaApi(_cognitoIdToken);
     if (!Array.isArray(skeleton) || !skeleton.length) {
         console.log('Request succeeded, but skeleton is empty.');
         return;

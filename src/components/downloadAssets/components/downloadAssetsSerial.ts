@@ -5,7 +5,6 @@ import {
 } from '../../../utilities/downloadAsync.js';
 import { getFileNameParts } from '../../../utilities/getFileNameParts.js';
 import { sleepAsync } from '../../../utilities/sleepAsync.js';
-import { authenticate } from '../../authenticate/index.js';
 import { IMoment } from '../types.js';
 
 const THISLIFE_DOWNLOAD_URL = 'https://io.thislife.com/download';
@@ -14,6 +13,7 @@ const THISLIFE_DOWNLOAD_URL = 'https://io.thislife.com/download';
  * Downloads assets corresponding to given list of moments in serial (i.e., no parallel
  * downloads) with interstitial delay and jitter to avoid overwhelming the server.
  * 
+ * @param cognitoIdToken - Function or string for obtaining a Cognito idToken.
  * @param moments - Shutterfly moments.
  * @param toDirectory - Destination directory for downloaded assets.
  * @param delayFixedMilliseconds - Fixed delay between downloads in integer milliseconds.
@@ -23,6 +23,7 @@ const THISLIFE_DOWNLOAD_URL = 'https://io.thislife.com/download';
  * @see https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
  */
 export const downloadAssetsSerial = async (
+    cognitoIdToken: (() => Promise<string>) | string,
     moments: IMoment[],
     toDirectory: IDownloadAsyncParameters['toDirectory'],
     delayFixedMilliseconds: number,
@@ -32,10 +33,10 @@ export const downloadAssetsSerial = async (
         if (i > 0) {
             await sleepAsync(delayFixedMilliseconds, delayJitterMilliseconds, (ms) => `Waiting ${ms} milliseconds...`);
         }
-        const { cognitoIdToken } = await authenticate({ isVerbose: false });
+        const _cognitoIdToken: string = typeof cognitoIdToken === 'function' ? await cognitoIdToken() : cognitoIdToken;
         console.log(`Downloading asset ${i + 1} of ${moments.length} (moment ${moments[i].uid})...`);
         await downloadAsync({
-            fromUrl: `${THISLIFE_DOWNLOAD_URL}?accessToken=${encodeURIComponent(cognitoIdToken)}&momentId=${encodeURIComponent(moments[i].uid)}&source=library`,
+            fromUrl: `${THISLIFE_DOWNLOAD_URL}?accessToken=${encodeURIComponent(_cognitoIdToken)}&momentId=${encodeURIComponent(moments[i].uid)}&source=library`,
             toDirectory,
             toFileName: (contentDispositionFileName = DEFAULT_DOWNLOAD_FILE_NAME) => {
                 // Convert 1234567890 => 1234567890000 => '2009-02-13T23:31:30.000Z' => '2009-02-13 23_31_30'.

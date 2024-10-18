@@ -1,5 +1,4 @@
 import { sleepAsync } from '../../../utilities/sleepAsync.js';
-import { authenticate } from '../../authenticate/index.js';
 import { THISLIFE_JSON_URL } from '../constants.js';
 import { IMoment, IThisLifeJsonResponseJson } from '../types.js';
 
@@ -78,6 +77,7 @@ const fetchPaginatedMomentsViaApi = async (
 /**
  * Fetches all moments for a given time range.
  * 
+ * @param cognitoIdToken - Function or string for obtaining a Cognito idToken.
  * @param startTimeUnixSeconds - Start of time range in seconds since Unix epoch.
  * @param endTimeUnixSeconds - End of time range in seconds since Unix epoch.
  * @param delayFixedMilliseconds - Fixed delay between requests in integer milliseconds.
@@ -87,6 +87,7 @@ const fetchPaginatedMomentsViaApi = async (
  * @see https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
  */
 export const fetchMoments = async (
+    cognitoIdToken: (() => Promise<string>) | string,
     startTimeUnixSeconds: number,
     endTimeUnixSeconds: number,
     delayFixedMilliseconds: number,
@@ -98,10 +99,10 @@ export const fetchMoments = async (
         if (i > 0) {
             await sleepAsync(delayFixedMilliseconds, delayJitterMilliseconds, (ms) => `Waiting ${ms} milliseconds...`);
         }
-        const { cognitoIdToken } = await authenticate({ isVerbose: false });
+        const _cognitoIdToken: string = typeof cognitoIdToken === 'function' ? await cognitoIdToken() : cognitoIdToken;
         // Fetch a page of moments. Pagination occurs from newest to oldest, so end time is the only moving target.
         const payload = await fetchPaginatedMomentsViaApi(
-            cognitoIdToken,
+            _cognitoIdToken,
             startTimeUnixSeconds,
             typeof previousOldestMomentTimestamp === 'number' ? previousOldestMomentTimestamp : endTimeUnixSeconds,
             1000, // The more items per page, the less likely it is that we'll end up in an infinite loop.

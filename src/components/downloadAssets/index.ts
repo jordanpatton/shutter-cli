@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { readdir } from 'node:fs/promises';
 
 import { getCommandLineParameter } from '../../utilities/getCommandLineParameter.js';
+import { authenticate } from '../authenticate/index.js';
 import { downloadAssetsSerial } from './components/downloadAssetsSerial.js';
 import { fetchMoments } from './components/fetchMoments.js';
 import { fetchSkeleton } from './components/fetchSkeleton.js';
@@ -106,6 +107,8 @@ export const downloadAssets = async ({
     endTimeUnixSeconds: givenEndTimeUnixSeconds,
     startTimeUnixSeconds: givenStartTimeUnixSeconds,
 }: IDownloadAssetsParameters): Promise<void> => {
+    const { authenticator } = await authenticate({ isVerbose: true });
+
     console.log('\nDetermining time range...');
     console.group();
     let startTimeUnixSeconds: number;
@@ -116,7 +119,7 @@ export const downloadAssets = async ({
         console.log('Skipping skeleton and using given time range.');
     } else {
         console.log('Fetching skeleton...');
-        const o = await fetchSkeleton();
+        const o = await fetchSkeleton(authenticator.authenticate);
         if (typeof o === 'undefined') {
             console.log('Terminating due to empty skeleton.');
             return;
@@ -143,6 +146,7 @@ export const downloadAssets = async ({
     console.log('\nBuilding list of downloadable assets...');
     console.group();
     const moments = await fetchMoments(
+        authenticator.authenticate,
         startTimeUnixSeconds,
         endTimeUnixSeconds,
         delayFixedMilliseconds,
@@ -165,6 +169,7 @@ export const downloadAssets = async ({
     console.log(`\nDownloading ${filteredMoments.length} assets...`);
     console.group();
     await downloadAssetsSerial(
+        authenticator.authenticate,
         filteredMoments,
         toDirectory,
         delayFixedMilliseconds,

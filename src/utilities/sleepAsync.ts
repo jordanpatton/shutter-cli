@@ -21,7 +21,7 @@ const sleepHelperAsync = (milliseconds: number): Promise<void> =>
  * 
  * @param fixedMilliseconds - How long to sleep (fixed; in milliseconds).
  * @param jitterMilliseconds - How long to sleep (jitter; in milliseconds).
- * @param message - Callback or primitive for printing a message to stdout during sleep.
+ * @param message - Function or string for printing a message to stdout during sleep.
  * @returns Promisified void. Settles when sleep ends.
  */
 export const sleepAsync = async (
