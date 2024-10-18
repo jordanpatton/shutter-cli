@@ -19,7 +19,7 @@ npm run build
 npm run start -- --command download-assets
 # Download assets to a specific directory.
 npm run start -- --command download-assets --to-directory "/path/to/directory"
-# Download assets between two dates with a longer delay between downloads.
+# Download assets between two dates with a longer delay between network requests.
 npm run start -- --command download-assets --start-time 2023-01-01 --end-time 2023-12-31 --delay-fixed-milliseconds 5000 --delay-jitter-milliseconds 2000
 # Manually run a command without npm scripts.
 node ./dist/index.js --command download-assets
