@@ -119,7 +119,7 @@ export const downloadAssets = async ({
         console.log('Skipping skeleton and using given time range.');
     } else {
         console.log('Fetching skeleton...');
-        const o = await fetchSkeleton(authenticator.authenticate);
+        const o = await fetchSkeleton(() => authenticator.authenticate(false));
         if (typeof o === 'undefined') {
             console.log('Terminating due to empty skeleton.');
             return;
@@ -146,7 +146,7 @@ export const downloadAssets = async ({
     console.log('\nBuilding list of downloadable assets...');
     console.group();
     const moments = await fetchMoments(
-        authenticator.authenticate,
+        () => authenticator.authenticate(false),
         startTimeUnixSeconds,
         endTimeUnixSeconds,
         delayFixedMilliseconds,
@@ -169,7 +169,7 @@ export const downloadAssets = async ({
     console.log(`\nDownloading ${filteredMoments.length} assets...`);
     console.group();
     await downloadAssetsSerial(
-        authenticator.authenticate,
+        () => authenticator.authenticate(false),
         filteredMoments,
         toDirectory,
         delayFixedMilliseconds,
