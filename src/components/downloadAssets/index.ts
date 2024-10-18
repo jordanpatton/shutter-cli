@@ -107,6 +107,10 @@ export const downloadAssets = async ({
     endTimeUnixSeconds: givenEndTimeUnixSeconds,
     startTimeUnixSeconds: givenStartTimeUnixSeconds,
 }: IDownloadAssetsParameters): Promise<void> => {
+    // Authenticate with verbose logging up front, then use the returned `Authenticator` to authenticate again before
+    // each request in this workflow. Subsequent authentications will hit the in-memory cache until it expires. We must
+    // pass it to helper functions as `() => authenticator.authenticate()` instead of `authenticator.authenticate`
+    // because the latter has a `this`-binding issue due to it being an instance method.
     const { authenticator } = await authenticate({ isVerbose: true });
 
     console.log('\nDetermining time range...');
