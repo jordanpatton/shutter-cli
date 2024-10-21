@@ -1,8 +1,12 @@
 import { launch } from 'puppeteer';
 
 import { repeatAsync } from '../../../../../utilities/repeatAsync.js';
+import {
+    COGNITO_TOKEN_COMMENT_DEFAULT_VALUE,
+    COGNITO_TOKEN_NAME_PREFIX,
+    COGNITO_TOKEN_VERSION_DEFAULT_VALUE,
+} from '../constants.js';
 import { ISession } from '../types.js';
-import { getCognitoIdToken } from './getCognitoIdToken.js';
 
 const BROWSER_INITIAL_HEIGHT_PIXELS = 768;
 const BROWSER_INITIAL_WIDTH_PIXELS = 1024;
@@ -14,8 +18,7 @@ const SHUTTERFLY_LOGIN_URL_WITH_COOKIES_REDIRECT = `${SHUTTERFLY_LOGIN_URL}/?red
  * Logs in to Shutterfly. We use puppeteer here because we don't want to fight with
  * recaptcha and any other anti-bot systems that would make things prohbitively difficult.
  * 
- * @returns Promisified identification token from Amazon Cognito authentication service.
- *          Settles when puppeteer script is done.
+ * @returns Promisified session. Settles when puppeteer script is done.
  */
 export const logIn = async (): Promise<ISession | undefined> => {
     /** Result. */
@@ -50,11 +53,25 @@ export const logIn = async (): Promise<ISession | undefined> => {
     // Cognito cookies every 1 second for 60 seconds before giving up.
     await repeatAsync(async (stopSignal) => {
         console.log('Polling for Cognito cookies...');
+        const dateNow = Date.now();
         const cookies = await page.cookies();
-        const cognitoIdToken = getCognitoIdToken(cookies);
-        if (typeof cognitoIdToken === 'string') {
-            console.log('Found Cognito idToken!');
-            result = { cookies, startTimeUnixMilliseconds: Date.now() };
+        const cognitoCookies = cookies.filter(v => v.name.startsWith(COGNITO_TOKEN_NAME_PREFIX));
+        if (cognitoCookies.length > 0) {
+            console.log('Found Cognito cookies!');
+            result = {
+                cognitoLastRefreshTimeUnixMilliseconds: dateNow,
+                cognitoTokens: cognitoCookies.map(v => ({
+                    comment: COGNITO_TOKEN_COMMENT_DEFAULT_VALUE,
+                    domain: v.domain,
+                    httpOnly: v.httpOnly,
+                    maxAge: v.expires - Math.round(dateNow / 1000), // in seconds
+                    name: v.name,
+                    path: v.path,
+                    secure: v.secure,
+                    value: v.value,
+                    version: COGNITO_TOKEN_VERSION_DEFAULT_VALUE,
+                })),
+            };
             shouldContinuePollingForCookies = false; // stop polling for cookies
         }
         if (!shouldContinuePollingForCookies) {

@@ -23,7 +23,7 @@ const ONE_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
  * Fetches basic skeleton that Shutterfly uses to construct the library page and perform
  * various other requests.
  * 
- * @param cognitoIdToken - Identification token from Amazon Cognito authentication service.
+ * @param cognitoIdToken - Identification token from Amazon Cognito identification service.
  * @returns Promisified successful response payload. (Not null, but `skeleton` may be null if account has no moments.) Settles when payload is ready.
  */
 const fetchSkeletonViaApi = async (

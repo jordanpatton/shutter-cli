@@ -1,9 +1,20 @@
-import { Cookie as ICookie } from 'puppeteer';
+/** Cognito token. */
+interface ICognitoToken {
+    comment: string | null;
+    domain: string | null;
+    httpOnly: boolean;
+    maxAge: number;
+    name: string;
+    path: string | null;
+    secure: boolean;
+    value: string;
+    version: number;
+}
 
 /** Fields extracted from a browser session. */
 export interface ISession {
-    /** Cookies. */
-    cookies: ICookie[];
-    /** Session start time in milliseconds since Unix epoch. */
-    startTimeUnixMilliseconds: number;
+    /** Last refresh time for Cognito in milliseconds since Unix epoch. */
+    cognitoLastRefreshTimeUnixMilliseconds: number;
+    /** Cognito tokens. */
+    cognitoTokens: ICognitoToken[];
 }

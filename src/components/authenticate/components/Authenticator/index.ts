@@ -1,9 +1,8 @@
 import { writeStringToFileAsync } from '../../../../utilities/writeStringToFileAsync.js';
-import { getCognitoIdToken } from './components/getCognitoIdToken.js';
 import { logIn } from './components/logIn.js';
 import { readSessionFromFile } from './components/readSessionFromFile.js';
 import { validateSession } from './components/validateSession.js';
-import { SESSION_DIRECTORY, SESSION_FILE_NAME } from './constants.js';
+import { COGNITO_TOKEN_NAME_POSTFIX_ID_TOKEN, SESSION_DIRECTORY, SESSION_FILE_NAME } from './constants.js';
 import { ISession } from './types.js';
 
 /** Maintains an authenticated web session with Shutterfly. */
@@ -35,17 +34,17 @@ export class Authenticator {
             consoleGroup();
             if (validateSession(this._session, isVerbose)) {
                 consoleLog('Existing session is valid.');
-                const oldCognitoIdToken = getCognitoIdToken(this._session.cookies);
-                if (typeof oldCognitoIdToken === 'string') {
-                    consoleLog('Existing Cognito idToken is valid.');
+                const oldCognitoIdToken = this._session.cognitoTokens.find(v => v.name.endsWith(COGNITO_TOKEN_NAME_POSTFIX_ID_TOKEN));
+                if (typeof oldCognitoIdToken?.value === 'string' && oldCognitoIdToken.value.length) {
+                    consoleLog('Existing Cognito idToken appears to be valid.');
                     consoleGroupEnd();
                     consoleLog('...done!');
-                    return oldCognitoIdToken;
+                    return oldCognitoIdToken.value;
                 } else {
                     consoleLog('Existing Cognito idToken is invalid.');
                 }
             } else {
-                consoleLog('Existing session is invalid.');
+                consoleLog('Existing session is valid.');
             }
             consoleGroupEnd();
             consoleLog('...done!');
@@ -72,11 +71,12 @@ export class Authenticator {
 
         consoleLog('\nValidating new Cognito idToken...');
         consoleGroup();
-        const newCognitoIdToken = getCognitoIdToken(this._session.cookies);
-        if (typeof newCognitoIdToken === 'string') {
+        const newCognitoIdToken = this._session.cognitoTokens.find(v => v.name.endsWith(COGNITO_TOKEN_NAME_POSTFIX_ID_TOKEN));
+        if (typeof newCognitoIdToken?.value === 'string' && newCognitoIdToken.value.length) {
+            consoleLog('New Cognito idToken appears to be valid.');
             consoleGroupEnd();
             consoleLog('...done!');
-            return newCognitoIdToken;
+            return newCognitoIdToken.value;
         } else {
             throw new Error('New Cognito idToken is invalid.');
         }
