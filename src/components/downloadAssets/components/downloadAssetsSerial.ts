@@ -37,12 +37,14 @@ export const downloadAssetsSerial = async (
         console.log(`Downloading asset ${i + 1} of ${moments.length} (moment ${moments[i].uid})...`);
         await downloadAsync({
             fetchOptions: {
+                body: null,
                 headers: { // All of these headers are optional. (Request works without them.)
                     // 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
                     // 'accept-language': 'en-US,en;q=0.9',
                     'cache-control': 'no-cache',
                     'pragma': 'no-cache'
                 },
+                method: 'GET'
             },
             fromUrl: `${THISLIFE_DOWNLOAD_URL}?accessToken=${encodeURIComponent(_cognitoIdToken)}&momentId=${encodeURIComponent(moments[i].uid)}&source=library`,
             toDirectory,
