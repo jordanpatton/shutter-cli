@@ -56,12 +56,12 @@ const fetchTokensViaApi = async (cookie: string): Promise<TGetTokensResponseJson
 export const refreshSession = async (
     { cognitoTokens }: ISession,
     isVerbose: boolean = false,
-): Promise<ISession | void> => {
+): Promise<ISession | undefined> => {
     const consoleLog = isVerbose ? console.log : () => {};
     const oldRefreshToken = cognitoTokens.find(v => v.name.endsWith(COGNITO_TOKEN_NAME_POSTFIX_REFRESH_TOKEN));
     if (typeof oldRefreshToken?.value !== 'string' || !oldRefreshToken.value.length) {
         consoleLog('Existing Cognito refreshToken is invalid.');
-        return;
+        return undefined;
     }
     consoleLog('Existing Cognito refreshToken appears to be valid.');
     // Capture timestamp immediately before request to improve expiration accuracy.
@@ -78,7 +78,7 @@ export const refreshSession = async (
         typeof newIdToken?.value !== 'string' || !newIdToken.value.length
     ) {
         consoleLog('Remote API failed to refresh tokens.');
-        return;
+        return undefined;
     }
     consoleLog('Remote API successfully refreshed tokens.');
     // Create a new session object instead of mutating the input.
