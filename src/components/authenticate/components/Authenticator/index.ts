@@ -21,6 +21,7 @@ export class Authenticator {
         const consoleGroupEnd = isVerbose ? console.groupEnd : () => {};
         const consoleLog = isVerbose ? console.log : () => {};
 
+        // Hydrate in-memory session from existing session in file.
         if (typeof this._session === 'undefined') {
             consoleLog('\nHydrating session from file...');
             consoleGroup();
@@ -29,6 +30,7 @@ export class Authenticator {
             consoleLog('...done!');
         }
 
+        // Validate existing session.
         if (typeof this._session !== 'undefined') {
             consoleLog('\nValidating existing session...');
             consoleGroup();
@@ -44,12 +46,15 @@ export class Authenticator {
                     consoleLog('Existing Cognito idToken is invalid.');
                 }
             } else {
-                consoleLog('Existing session is valid.');
+                consoleLog('Existing session is invalid.');
             }
             consoleGroupEnd();
             consoleLog('...done!');
         }
 
+        // TODO: refresh session
+
+        // Session is invalid or non-existent; try to start a new session.
         consoleLog('\nLogging in to Shutterfly...');
         consoleGroup();
         this._session = await logIn();
@@ -59,6 +64,7 @@ export class Authenticator {
         consoleGroupEnd();
         consoleLog('...done!');
 
+        // Write refreshed or new session to file.
         consoleLog('\nWriting session to file...');
         consoleGroup();
         await writeStringToFileAsync({
@@ -69,6 +75,7 @@ export class Authenticator {
         consoleGroupEnd();
         consoleLog('...done!');
 
+        // Validate refreshed or new session.
         consoleLog('\nValidating new Cognito idToken...');
         consoleGroup();
         const newCognitoIdToken = this._session.cognitoTokens.find(v => v.name.endsWith(COGNITO_TOKEN_NAME_POSTFIX_ID_TOKEN));

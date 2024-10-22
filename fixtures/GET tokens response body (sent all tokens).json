@@ -1,0 +1,79 @@
+[
+    {
+        "name": "CognitoIdentityServiceProvider.t8oiif52mece6bleeas2pof0n.LastAuthUser",
+        "value": "name@domain.tld",
+        "comment": null,
+        "domain": null,
+        "maxAge": -1,
+        "path": null,
+        "secure": false,
+        "version": 0,
+        "httpOnly": false
+    },
+    {
+        "name": "CognitoIdentityServiceProvider.t8oiif52mece6bleeas2pof0n.name%40domain.tld.accessToken",
+        "value": "old-accessToken-value",
+        "comment": null,
+        "domain": null,
+        "maxAge": -1,
+        "path": null,
+        "secure": false,
+        "version": 0,
+        "httpOnly": false
+    },
+    {
+        "name": "CognitoIdentityServiceProvider.t8oiif52mece6bleeas2pof0n.name%40domain.tld.refreshToken",
+        "value": "old-refreshToken-value",
+        "comment": null,
+        "domain": null,
+        "maxAge": -1,
+        "path": null,
+        "secure": false,
+        "version": 0,
+        "httpOnly": false
+    },
+    {
+        "name": "CognitoIdentityServiceProvider.t8oiif52mece6bleeas2pof0n.name%40domain.tld.clockDrift",
+        "value": "0",
+        "comment": null,
+        "domain": null,
+        "maxAge": -1,
+        "path": null,
+        "secure": false,
+        "version": 0,
+        "httpOnly": false
+    },
+    {
+        "name": "CognitoIdentityServiceProvider.t8oiif52mece6bleeas2pof0n.name%40domain.tld.idToken",
+        "value": "old-idToken-value",
+        "comment": null,
+        "domain": null,
+        "maxAge": -1,
+        "path": null,
+        "secure": false,
+        "version": 0,
+        "httpOnly": false
+    },
+    {
+        "name": "CognitoIdentityServiceProvider.t8oiif52mece6bleeas2pof0n.name%40domain.tld.accessToken",
+        "value": "new-accessToken-value",
+        "comment": null,
+        "domain": "accounts.shutterfly.com",
+        "maxAge": 3600,
+        "path": "/",
+        "secure": true,
+        "version": 0,
+        "httpOnly": false
+    },
+    {
+        "name": "CognitoIdentityServiceProvider.t8oiif52mece6bleeas2pof0n.name%40domain.tld.idToken",
+        "value": "new-idToken-value",
+        "comment": null,
+        "domain": "accounts.shutterfly.com",
+        "maxAge": 3600,
+        "path": "/",
+        "secure": true,
+        "version": 0,
+        "httpOnly": false
+    }
+]

@@ -1,15 +1,11 @@
 /** Default value for `comment` field of Cognito token. */
 export const COGNITO_TOKEN_COMMENT_DEFAULT_VALUE = null;
-// /** Cognito token name postfix for access token. */
-// export const COGNITO_TOKEN_NAME_POSTFIX_ACCESS_TOKEN = '.accessToken';
-// /** Cognito token name postfix for clock drift. */
-// export const COGNITO_TOKEN_NAME_POSTFIX_CLOCK_DRIFT = '.clockDrift';
+/** Cognito token name postfix for access token. */
+export const COGNITO_TOKEN_NAME_POSTFIX_ACCESS_TOKEN = '.accessToken';
 /** Cognito token name postfix for id token. */
 export const COGNITO_TOKEN_NAME_POSTFIX_ID_TOKEN = '.idToken';
-// /** Cognito token name postfix for last auth user. */
-// export const COGNITO_TOKEN_NAME_POSTFIX_LAST_AUTH_USER = '.LastAuthUser';
-// /** Cognito token name postfix for refresh token. */
-// export const COGNITO_TOKEN_NAME_POSTFIX_REFRESH_TOKEN = '.refreshToken';
+/** Cognito token name postfix for refresh token. */
+export const COGNITO_TOKEN_NAME_POSTFIX_REFRESH_TOKEN = '.refreshToken';
 /** Cognito token name prefix. */
 export const COGNITO_TOKEN_NAME_PREFIX = 'CognitoIdentityServiceProvider.';
 /** Default value for `version` field of Cognito token. */
@@ -20,7 +16,7 @@ export const SESSION_DIRECTORY = './ignore';
 /** File name (base name + extension) of session flat file. */
 export const SESSION_FILE_NAME = 'session.json';
 /** How much earlier before a session expires to force a refresh. Helps reduce request failures. */
-const SESSION_TIME_TO_LIVE_DISCOUNT_MILLISECONDS = 1000 * 60 * 1; // 5 minutes
+const SESSION_TIME_TO_LIVE_DISCOUNT_MILLISECONDS = 1000 * 60 * 5; // 5 minutes
 /**
  * Maximum amount of time before a session expires. ("Session expires" means `accessToken` and `idToken` are rejected by
  * the server.) This value is extremely important because Shutterfly returns incorrect expiration times for some tokens

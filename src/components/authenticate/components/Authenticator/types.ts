@@ -1,8 +1,9 @@
 /** Cognito token. */
-interface ICognitoToken {
+export interface ICognitoToken {
     comment: string | null;
     domain: string | null;
     httpOnly: boolean;
+    /** Maximum age in seconds. */
     maxAge: number;
     name: string;
     path: string | null;
