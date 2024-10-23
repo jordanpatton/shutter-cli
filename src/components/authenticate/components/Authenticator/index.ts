@@ -6,9 +6,9 @@ import { validateSession } from './components/validateSession.js';
 import { COGNITO_TOKEN_NAME_POSTFIX_ID_TOKEN, SESSION_DIRECTORY, SESSION_FILE_NAME } from './constants.js';
 import { ISession } from './types.js';
 
-/** Maintains an authenticated web session with Shutterfly. */
+/** Maintains an authenticated web session with Shutterfly. Caches session in memory to minimize disk operations. */
 export class Authenticator {
-    /** In-memory session. Helps reduce disk read operations. */
+    /** In-memory session. Helps minimize disk operations. */
     _session: ISession | undefined;
 
     /**
@@ -16,7 +16,7 @@ export class Authenticator {
      * 
      * @param shouldWriteSessionToFile - Whether or not to write the in-memory session to file.
      * @param isVerbose - Whether or not to be verbose.
-     * @returns Promisified boolean (`true` if all tasks were completed; otherwise `false`). Settles when done.
+     * @returns Promisified boolean: `true` if all tasks were completed; otherwise `false`. Settles when done.
      */
     async _authenticateHelper(
         shouldWriteSessionToFile: boolean = false,
@@ -107,7 +107,11 @@ export class Authenticator {
         throw new Error('Failed to authenticate.');
     }
 
-    /** Returns the Cognito idToken from the in-memory session. */
+    /**
+     * Returns the Cognito idToken from the in-memory session if it exists.
+     * 
+     * @returns Cognito idToken from in-memory session if it exists; otherwise `undefined`.
+     */
     getCognitoIdToken(): string | undefined {
         return this._session?.cognitoTokens.find(v => v.name.endsWith(COGNITO_TOKEN_NAME_POSTFIX_ID_TOKEN))?.value;
     }
