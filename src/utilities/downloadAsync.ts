@@ -17,7 +17,7 @@ export interface IDownloadAsyncParameters {
     /** Destination directory for downloaded resource. */
     toDirectory?: IWriteStreamToFileAsyncParameters['toDirectory'];
     /** File name (base name + extension) for downloaded resource. Defaults to `Content-Disposition` file name in response headers. */
-    toFileName?: IWriteStreamToFileAsyncParameters['toFileName'] | ((contentDispositionFileName: ReturnType<typeof getFileNameFromContentDispositionHeader>) => IWriteStreamToFileAsyncParameters['toFileName']);
+    toFileName?: ((contentDispositionFileName: ReturnType<typeof getFileNameFromContentDispositionHeader>) => IWriteStreamToFileAsyncParameters['toFileName']) | IWriteStreamToFileAsyncParameters['toFileName'];
 }
 
 /** Default directory for downloaded files. */
@@ -37,7 +37,7 @@ export const downloadAsync = async ({
     fromUrl,
     shouldMakeDirectory,
     toDirectory = DEFAULT_DOWNLOAD_DIRECTORY,
-    toFileName = (contentDispositionFileName) => contentDispositionFileName ?? DEFAULT_DOWNLOAD_FILE_NAME,
+    toFileName = (contentDispositionFileName) => {return contentDispositionFileName ?? DEFAULT_DOWNLOAD_FILE_NAME;},
 }: IDownloadAsyncParameters): Promise<void> => {
     // Request file.
     const response = await fetch(fromUrl, fetchOptions);
@@ -49,7 +49,7 @@ export const downloadAsync = async ({
     }
     // Determine file name.
     const contentDispositionFileName = getFileNameFromContentDispositionHeader(response.headers.get('Content-Disposition'));
-    const _toFileName: string = typeof toFileName === 'string' ? toFileName : toFileName(contentDispositionFileName);
+    const _toFileName: string = typeof toFileName === 'function' ? toFileName(contentDispositionFileName) : toFileName;
     // Write file.
     return writeStreamToFileAsync({
         createWriteStreamOptions,

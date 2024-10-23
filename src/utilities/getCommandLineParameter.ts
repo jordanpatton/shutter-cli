@@ -8,7 +8,7 @@ export const getCommandLineParameter = (key: string) : {
     keyIsPresent: boolean;
     value: string | undefined;
 } => {
-    // Item 0 is the path to node executable.
+    // Item 0 is the path to the node executable.
     // Item 1 is the path to the entry-point script.
     // Any further items are optional parameters.
     const argvSlice = process.argv.slice(2);

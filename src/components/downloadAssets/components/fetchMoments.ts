@@ -21,26 +21,24 @@ type TGetPaginatedMomentsResponseJson = IThisLifeJsonResponseJson<TGetPaginatedM
 
 /**
  * Fetches paginated moments from newest to oldest.
- * - In order to paginate, you must hold `startTimeUnixSeconds` constant and shift
- *   `endTimeUnixSeconds` earlier after each request (replace with `oldestMomentTimestamp`
- *   from response) until `morePages` is `false`.
- * - **DO NOT** subtract time from `oldestMomentTimestamp` before using it to replace
- *   `endTimeUnixSeconds` between requests. Doing so could cause you to skip moments that
- *   share the same `moment_date`. Instead, you'll need to manually check for an infinite
- *   loop and deduplicate the results. (Yes, the remote API's paging system sucks.)
- * - **INFINITE LOOP:** After each request, you must verify that `oldestMomentTimestamp`
- *   is not the same as the prior request. If it is the same, then there are too many
- *   items sharing the same `moment_date`, and you will be caught in an infinite loop. You
- *   must either increase `maximumNumberOfItemsPerPage` until `oldestMomentTimestamp`
- *   changes OR error out.
- * - **DEDUPLICATION:** After completing multiple pagination requests, you should
- *   deduplicate the accumulated moments by `uid`.
+ * - In order to paginate, you must hold `startTimeUnixSeconds` constant and shift `endTimeUnixSeconds` earlier after
+ *   each request (replace with `oldestMomentTimestamp` from response) until `morePages` is `false`.
+ * - **DO NOT** subtract time from `oldestMomentTimestamp` before using it to replace `endTimeUnixSeconds` between
+ *   requests. Doing so could cause you to skip moments that share the same `moment_date`. Instead, you'll need to
+ *   manually check for an infinite loop and deduplicate the results. (Yes, the remote API's paging system sucks.)
+ * - **INFINITE LOOP:** After each request, you must verify that `oldestMomentTimestamp` is not the same as the prior
+ *   request. If it is the same, then there are too many items sharing the same `moment_date`, and you will be caught in
+ *   an infinite loop. You must either increase `maximumNumberOfItemsPerPage` until `oldestMomentTimestamp` changes OR
+ *   error out.
+ * - **DEDUPLICATION:** After completing multiple pagination requests, you should deduplicate the accumulated moments by
+ *   `uid`.
  * 
  * @param cognitoIdToken - Identification token from Amazon Cognito identification service.
  * @param startTimeUnixSeconds - Start time in seconds since Unix epoch. Should remain constant across requests.
  * @param endTimeUnixSeconds - End time in seconds since Unix epoch. Should decrease with each request.
  * @param maximumNumberOfItemsPerPage - Maximum number of items per page. Should be large to avoid an infinite loop.
- * @returns Promisified successful response payload. (Not null, but may be empty array if page contains no data.) Settles when payload is ready.
+ * @returns Promisified successful response payload. (Not null, but may be empty array if page contains no data.)
+ *          Settles when payload is ready.
  */
 const fetchPaginatedMomentsViaApi = async (
     cognitoIdToken: string,

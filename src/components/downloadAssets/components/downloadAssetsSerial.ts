@@ -10,8 +10,8 @@ import { IMoment } from '../types.js';
 const THISLIFE_DOWNLOAD_URL = 'https://io.thislife.com/download';
 
 /**
- * Downloads assets corresponding to given list of moments in serial (i.e., no parallel
- * downloads) with interstitial delay and jitter to avoid overwhelming the server.
+ * Downloads assets corresponding to given list of moments in serial (i.e., no parallel downloads) with interstitial
+ * delay and jitter to avoid overwhelming the server.
  * 
  * @param cognitoIdToken - Function or string for obtaining a Cognito idToken.
  * @param moments - Shutterfly moments.

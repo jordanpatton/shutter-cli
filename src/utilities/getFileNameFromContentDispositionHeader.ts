@@ -1,8 +1,7 @@
 /**
- * Returns the file name from a `Content-Disposition` header. For CORS requests, the
- * `Access-Control-Expose-Headers` header must be set on the server or else the
- * `Content-Disposition` header will not be present in the response. When used with nodejs
- * (not a browser) CORS does not apply, and you don't need to worry about it.
+ * Returns the file name from a `Content-Disposition` header. For CORS requests, the `Access-Control-Expose-Headers`
+ * header must be set on the server or else the `Content-Disposition` header will not be present in the response. When
+ * used with nodejs (not a browser) CORS does not apply, and you don't need to worry about it.
  * 
  * `Content-Disposition` headers come in some pretty weird formats. Examples:
  * @example inline; filename="simple.jpg"

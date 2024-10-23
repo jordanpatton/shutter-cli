@@ -4,8 +4,8 @@ import { sleepAsync } from './sleepAsync.js';
 const STOP_SIGNAL = 'REPEAT_ASYNC_STOP_SIGNAL';
 
 /**
- * Recursively invokes user-defined `task` until stopped. Repetition stops when `task`
- * returns `STOP_SIGNAL` or `timeToLiveMilliseconds` runs out.
+ * Recursively invokes user-defined `task` until stopped. Repetition stops when `task` returns `STOP_SIGNAL` or
+ * `timeToLiveMilliseconds` runs out.
  * 
  * @param callerResolve - `resolve` function from caller `Promise`.
  * @param callerReject - `reject` function from caller `Promise`.
@@ -46,8 +46,8 @@ const repeatAsyncHelper = (
 };
 
 /**
- * Repeats user-defined `task` until stopped. Repetition stops when `task` returns
- * `STOP_SIGNAL` or `timeToLiveMilliseconds` runs out. `async`-compatible.
+ * Repeats user-defined `task` until stopped. Repetition stops when `task` returns `STOP_SIGNAL` or
+ * `timeToLiveMilliseconds` runs out. `async`-compatible.
  * 
  * @param task - User-defined behavior to be repeated. May return `STOP_SIGNAL` to stop repetition.
  * @param sleepMilliseconds - How long to sleep (in milliseconds) between `task` invocations.

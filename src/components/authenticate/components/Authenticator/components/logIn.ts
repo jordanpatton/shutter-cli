@@ -15,8 +15,8 @@ const SHUTTERFLY_LOGIN_URL = 'https://accounts.shutterfly.com';
 const SHUTTERFLY_LOGIN_URL_WITH_COOKIES_REDIRECT = `${SHUTTERFLY_LOGIN_URL}/?redirectUri=${encodeURIComponent(SHUTTERFLY_COOKIES_URL)}`;
 
 /**
- * Logs in to Shutterfly. We use puppeteer here because we don't want to fight with
- * recaptcha and any other anti-bot systems that would make things prohbitively difficult.
+ * Logs in to Shutterfly. We use puppeteer here because we don't want to fight with recaptcha and any other anti-bot
+ * systems that would make things prohbitively difficult.
  * 
  * @returns Promisified session. Settles when puppeteer script is done.
  */

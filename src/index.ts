@@ -5,7 +5,7 @@ import { getCommandLineParameter } from './utilities/getCommandLineParameter.js'
 /**
  * Main entrypoint for this program.
  * 
- * @returns Return value from command or void.
+ * @returns Command result or void.
  */
 export const main = (): ReturnType<typeof authenticate> | ReturnType<typeof downloadAssets> | void => {
     const command = getCommandLineParameter('--command').value;
