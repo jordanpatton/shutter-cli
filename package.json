@@ -1,12 +1,14 @@
 {
-    "name": "shutterfly-downloader",
-    "description": "Shutterfly Downloader",
+    "name": "shutter-cli",
+    "description": "Unofficial Shutterfly Command-Line Interface",
     "version": "0.0.0",
     "license": "MIT",
     "author": "Jordan Patton",
-    "homepage": "https://github.com/jordanpatton/shutterfly-downloader",
+    "homepage": "https://github.com/jordanpatton/shutter-cli",
     "keywords": [
-        "downloader",
+        "cli",
+        "command-line",
+        "interface",
         "shutterfly"
     ],
     "dependencies": {
@@ -18,7 +20,7 @@
     "main": "index.js",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/jordanpatton/shutterfly-downloader.git"
+        "url": "git+https://github.com/jordanpatton/shutter-cli.git"
     },
     "scripts": {
         "build": "npx tsc",
