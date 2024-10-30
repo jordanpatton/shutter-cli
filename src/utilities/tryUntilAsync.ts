@@ -118,7 +118,7 @@ export const tryUntilAsync = <TTaskResult>(
     {
         isVerbose = false,
         maximumNumberOfTries,
-        sleepMilliseconds = ((recursionIndex: number) => 1000 * Math.pow(2, recursionIndex)),
+        sleepMilliseconds = (ri) => 1000 * Math.pow(2, ri),
         timeToLiveMilliseconds,
     }: ITryUntilAsyncOptions = {},
 ): Promise<TTaskResult> =>
