@@ -1,12 +1,12 @@
 import { sleepAsync } from './sleepAsync.js';
 
 /**
- * Recursively invokes user-defined `task` until it succeeds, times out, or runs out of tries. Time between tries grows
- * exponentially.
+ * Recursively invokes user-defined `task` until one of the following occurs: `task` succeeds, this function times out,
+ * or this function runs out of tries. Time between tries grows exponentially.
  * 
  * @param callerResolve - `resolve` function from caller `Promise`.
  * @param callerReject - `reject` function from caller `Promise`.
- * @param task - User-defined behavior to be repeated.
+ * @param task - User-defined behavior to be tried.
  * @param sleepMilliseconds - How long to sleep (in milliseconds) if the current `task` invocation fails.
  * @param startTimeMilliseconds - Time (in milliseconds since Unix epoch) when recursion started.
  * @param timeToLiveMilliseconds - How long to continue trying (in milliseconds) before timing out.
@@ -84,12 +84,19 @@ const tryWithExponentialBackoffAsyncHelper = <TTaskResult>(
 };
 
 /**
- * Invokes user-defined `task` until it succeeds, times out, or runs out of tries. Time between tries grows
- * exponentially.
+ * Repeatedly invokes user-defined `task` until one of the following occurs: `task` succeeds, this function times out,
+ * or this function runs out of tries. Time between tries grows exponentially.
  * 
- * @param task - User-defined behavior to be repeated. Should be an asynchronous function (`async` or manually returns a
- *        `Promise`) OR a synchronous function that throws an unhandled exception. If you pass in a synchronous function
- *        that cannot throw then this will still work, but it will be completely pointless.
+ * @param task - User-defined behavior to be tried. Can be either synchronous or asynchronous, but must "fail" or
+ *        "succeed" according to the following logic. (Note: If `task` cannot "fail", then this function will still
+ *        work, but it will be completely pointless because `task` will always "succeed" on the first try.)
+ *        - If `task` is synchronous, then it should "fail" by throwing an unhandled exception, and it should "succeed"
+ *          by completing without throwing.
+ *        - If `task` is asynchronous via manually returning a `Promise`, then it should "fail" by returning a rejected
+ *          `Promise`, and it should "succeed" by returning a resolved `Promise`.
+ *        - If `task` is asynchronous via the `async` keyword, then it should "fail" by throwing an unhandled exception
+ *          (creating a rejected `Promise`), and it should "succeed" by completing without throwing (creating a resolved
+ *          `Promise`).
  * @param initialSleepMilliseconds - How long to sleep (in milliseconds) after the first `task` invocation fails.
  *        Subsequent sleeps will grow exponentially according to the following formula:
  *        `initialSleepMilliseconds * Math.pow(2, recursionIndex)`.
