@@ -15,7 +15,7 @@ import { sleepAsync } from './sleepAsync.js';
  * @param isVerbose - Whether or not to be verbose.
  * @returns Void.
  */
-const tryWithExponentialBackoffAsyncHelper = <TTaskResult>(
+const tryAsyncHelper = <TTaskResult>(
     callerResolve: (value: TTaskResult | PromiseLike<TTaskResult>) => void,
     callerReject: (reason?: any) => void,
     task: () => Promise<TTaskResult> | TTaskResult,
@@ -63,7 +63,7 @@ const tryWithExponentialBackoffAsyncHelper = <TTaskResult>(
             // Otherwise, sleep and try again.
             sleepAsync(sleepMilliseconds).then(
                 () => {
-                    tryWithExponentialBackoffAsyncHelper( // Recurse.
+                    tryAsyncHelper( // Recurse.
                         callerResolve,
                         callerReject,
                         task,
@@ -108,7 +108,7 @@ const tryWithExponentialBackoffAsyncHelper = <TTaskResult>(
  * @returns Promisified task result. Settles when `task` succeeds, this function times out, or this function runs out of
  *          tries.
  */
-export const tryWithExponentialBackoffAsync = <TTaskResult>(
+export const tryAsync = <TTaskResult>(
     task: () => Promise<TTaskResult> | TTaskResult,
     initialSleepMilliseconds: number = 1000,
     timeToLiveMilliseconds?: number,
@@ -116,7 +116,7 @@ export const tryWithExponentialBackoffAsync = <TTaskResult>(
     isVerbose: boolean = false,
 ): Promise<TTaskResult> =>
     new Promise((resolve, reject) => {
-        tryWithExponentialBackoffAsyncHelper(
+        tryAsyncHelper(
             resolve,
             reject,
             task,
