@@ -2,7 +2,7 @@ import { sleepAsync } from './sleepAsync.js';
 
 /**
  * Recursively invokes user-defined `task` until one of the following occurs: `task` succeeds, this function times out,
- * or this function runs out of tries. Time between tries grows exponentially.
+ * or this function runs out of tries.
  * 
  * @param callerResolve - `resolve` function from caller `Promise`.
  * @param callerReject - `reject` function from caller `Promise`.
@@ -19,7 +19,7 @@ const tryAsyncHelper = <TTaskResult>(
     callerResolve: (value: TTaskResult | PromiseLike<TTaskResult>) => void,
     callerReject: (reason?: any) => void,
     task: () => Promise<TTaskResult> | TTaskResult,
-    sleepMilliseconds: number,
+    sleepMilliseconds: ((recursionIndex: number) => number) | number,
     startTimeMilliseconds: number,
     timeToLiveMilliseconds?: number,
     remainingNumberOfTries?: number,
@@ -50,9 +50,13 @@ const tryAsyncHelper = <TTaskResult>(
             consoleError(reason);
             consoleGroupEnd();
             // If we have run out of time OR will run out of time during the next sleep, then stop recursing.
+            // Note: In order to use up 100% of the allotted time (which is cut short when we detect we'll time out
+            // during the next sleep), we could sleep for the remaining time before rejecting, but that seems pointless.
+            const sleepMillisecondsNumber: number =
+                typeof sleepMilliseconds === 'function' ? sleepMilliseconds(recursionIndex) : sleepMilliseconds;
             if (typeof timeToLiveMilliseconds === 'number') {
-                const remainingMs = timeToLiveMilliseconds - (Date.now() - startTimeMilliseconds);
-                if (remainingMs <= 0 || remainingMs < sleepMilliseconds) {
+                const remainingMs: number = timeToLiveMilliseconds - (Date.now() - startTimeMilliseconds);
+                if (remainingMs <= 0 || remainingMs < sleepMillisecondsNumber) {
                     callerReject('Timed out.');
                 }
             }
@@ -61,13 +65,13 @@ const tryAsyncHelper = <TTaskResult>(
                 callerReject('Ran out of tries.');
             }
             // Otherwise, sleep and try again.
-            sleepAsync(sleepMilliseconds).then(
+            sleepAsync(sleepMillisecondsNumber).then(
                 () => {
                     tryAsyncHelper( // Recurse.
                         callerResolve,
                         callerReject,
                         task,
-                        sleepMilliseconds * 2, // sleepMilliseconds * Math.pow(2, recursionIndex)
+                        sleepMilliseconds,
                         startTimeMilliseconds,
                         timeToLiveMilliseconds,
                         typeof remainingNumberOfTries === 'number' ? remainingNumberOfTries - 1 : undefined,
@@ -85,7 +89,7 @@ const tryAsyncHelper = <TTaskResult>(
 
 /**
  * Repeatedly invokes user-defined `task` until one of the following occurs: `task` succeeds, this function times out,
- * or this function runs out of tries. Time between tries grows exponentially.
+ * or this function runs out of tries.
  * 
  * @param task - User-defined behavior to be tried. Can be either synchronous or asynchronous, but must "fail" or
  *        "succeed" according to the following logic. (Note: If `task` cannot "fail", then this function will still
@@ -97,9 +101,8 @@ const tryAsyncHelper = <TTaskResult>(
  *        - If `task` is asynchronous via the `async` keyword, then it should "fail" by throwing an unhandled exception
  *          (creating a rejected `Promise`), and it should "succeed" by completing without throwing (creating a resolved
  *          `Promise`).
- * @param initialSleepMilliseconds - How long to sleep (in milliseconds) after the first `task` invocation fails.
- *        Subsequent sleeps will grow exponentially according to the following formula:
- *        `initialSleepMilliseconds * Math.pow(2, recursionIndex)`.
+ * @param sleepMilliseconds - How long to sleep (in milliseconds) between tries. By default, sleep time starts at 1000
+ *        milliseconds and grows exponentially according to the following formula: `1000 * Math.pow(2, recursionIndex)`.
  * @param timeToLiveMilliseconds - How long to continue trying (in milliseconds) before timing out. Can be used
  *        simultaneously with `maximumNumberOfTries`.
  * @param maximumNumberOfTries - How many times to try before giving up. Can be used simultaneously with
@@ -110,7 +113,7 @@ const tryAsyncHelper = <TTaskResult>(
  */
 export const tryAsync = <TTaskResult>(
     task: () => Promise<TTaskResult> | TTaskResult,
-    initialSleepMilliseconds: number = 1000,
+    sleepMilliseconds: ((recursionIndex: number) => number) | number = ((ri) => 1000 * Math.pow(2, ri)),
     timeToLiveMilliseconds?: number,
     maximumNumberOfTries?: number,
     isVerbose: boolean = false,
@@ -120,7 +123,7 @@ export const tryAsync = <TTaskResult>(
             resolve,
             reject,
             task,
-            initialSleepMilliseconds,
+            sleepMilliseconds,
             Date.now(),
             timeToLiveMilliseconds,
             maximumNumberOfTries,
