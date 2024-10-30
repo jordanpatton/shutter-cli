@@ -114,7 +114,7 @@ const tryUntilAsyncHelper = <TTaskResult>(
  *          of tries.
  */
 export const tryUntilAsync = <TTaskResult>(
-    task: () => Promise<TTaskResult> | TTaskResult,
+    task: () => TTaskResult | Promise<TTaskResult>,
     {
         isVerbose = false,
         maximumNumberOfTries,
