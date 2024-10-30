@@ -1,20 +1,13 @@
 import { promisifyByException } from './promisifyByException.js';
 import { sleepAsync } from './sleepAsync.js';
 
-interface ITryUntilAsyncOptions {
+/** `tryUntilAsyncHelper` options. */
+interface ITryUntilAsyncHelperOptions {
     /** Whether or not to be verbose. */
     isVerbose?: boolean;
-    /** How many times to try before giving up. Can be used simultaneously with `timeToLiveMilliseconds`. */
-    maximumNumberOfTries?: number;
-    /**
-     * How long to sleep (in milliseconds) between tries. By default, sleep time starts at 1000 milliseconds and grows
-     * exponentially according to the following formula: `1000 * Math.pow(2, recursionIndex)`.
-     */
-    sleepMilliseconds?: ((recursionIndex: number) => number) | number;
-    /**
-     * How long to continue trying (in milliseconds) before timing out. Can be used simultaneously with
-     * `maximumNumberOfTries`.
-     */
+    /** How many more times to try before giving up. */
+    remainingNumberOfTries?: number;
+    /** How long to continue trying (in milliseconds) before timing out. */
     timeToLiveMilliseconds?: number;
 }
 
@@ -27,10 +20,8 @@ interface ITryUntilAsyncOptions {
  * @param promisifiedTask - Promisified version of user-defined behavior to be tried.
  * @param sleepMillisecondsFunction - How long to sleep (in milliseconds) if the current `task` invocation fails.
  * @param startTimeMilliseconds - Time (in milliseconds since Unix epoch) when recursion started.
- * @param timeToLiveMilliseconds - How long to continue trying (in milliseconds) before timing out.
- * @param remainingNumberOfTries - How many more times to try before giving up.
  * @param recursionIndex - Zero-indexed recursion counter.
- * @param isVerbose - Whether or not to be verbose.
+ * @param options - Options.
  * @returns Void.
  */
 const tryUntilAsyncHelper = <TTaskResult>(
@@ -39,10 +30,12 @@ const tryUntilAsyncHelper = <TTaskResult>(
     promisifiedTask: () => Promise<TTaskResult>,
     sleepMillisecondsFunction: (recursionIndex: number) => number,
     startTimeMilliseconds: number,
-    timeToLiveMilliseconds?: number,
-    remainingNumberOfTries?: number,
-    recursionIndex: number = 0,
-    isVerbose: boolean = false,
+    recursionIndex: number,
+    {
+        isVerbose = false,
+        remainingNumberOfTries,
+        timeToLiveMilliseconds,
+    }: ITryUntilAsyncHelperOptions = {},
 ): void => {
     // Prepare loggers.
     const consoleError = isVerbose ? console.error : () => {};
@@ -79,10 +72,12 @@ const tryUntilAsyncHelper = <TTaskResult>(
                         promisifiedTask,
                         sleepMillisecondsFunction,
                         startTimeMilliseconds,
-                        timeToLiveMilliseconds,
-                        typeof remainingNumberOfTries === 'number' ? remainingNumberOfTries - 1 : undefined,
                         recursionIndex + 1,
-                        isVerbose,
+                        {
+                            isVerbose,
+                            remainingNumberOfTries: typeof remainingNumberOfTries === 'number' ? remainingNumberOfTries - 1 : undefined,
+                            timeToLiveMilliseconds,
+                        },
                     );
                 },
                 () => {
@@ -92,6 +87,24 @@ const tryUntilAsyncHelper = <TTaskResult>(
         },
     );
 };
+
+/** `tryUntilAsync` options. */
+interface ITryUntilAsyncOptions {
+    /** Whether or not to be verbose. */
+    isVerbose?: boolean;
+    /** How many times to try before giving up. Can be used simultaneously with `timeToLiveMilliseconds`. */
+    maximumNumberOfTries?: number;
+    /**
+     * How long to sleep (in milliseconds) between tries. By default, sleep time starts at 1000 milliseconds and grows
+     * exponentially according to the following formula: `1000 * Math.pow(2, recursionIndex)`.
+     */
+    sleepMilliseconds?: ((recursionIndex: number) => number) | number;
+    /**
+     * How long to continue trying (in milliseconds) before timing out. Can be used simultaneously with
+     * `maximumNumberOfTries`.
+     */
+    timeToLiveMilliseconds?: number;
+}
 
 /**
  * Repeatedly invokes user-defined `task` until one of the following occurs: `task` succeeds, this function times out,
@@ -129,9 +142,11 @@ export const tryUntilAsync = <TTaskResult>(
             promisifyByException(task),
             typeof sleepMilliseconds === 'function' ? sleepMilliseconds : () => sleepMilliseconds,
             Date.now(),
-            timeToLiveMilliseconds,
-            maximumNumberOfTries,
             0,
-            isVerbose,
+            {
+                isVerbose,
+                remainingNumberOfTries: maximumNumberOfTries,
+                timeToLiveMilliseconds,
+            },
         );
     });
