@@ -11,7 +11,7 @@ const STOP_SIGNAL = 'REPEAT_ASYNC_STOP_SIGNAL';
  * @param callerReject - `reject` function from caller `Promise`.
  * @param task - User-defined behavior to be repeated. May return `STOP_SIGNAL` to stop repetition.
  * @param sleepMilliseconds - How long to sleep (in milliseconds) between `task` invocations.
- * @param startTimeMilliseconds - Time (in milliseconds since Unix epoch) since repetition started.
+ * @param startTimeMilliseconds - Time (in milliseconds since Unix epoch) when repetition started.
  * @param timeToLiveMilliseconds - How long to continue repeating (in milliseconds) before timing out.
  * @returns Void.
  */
@@ -33,15 +33,15 @@ const repeatAsyncHelper = (
                     && (Date.now() - startTimeMilliseconds) >= timeToLiveMilliseconds // timed out
                 )
             ) {
-                callerResolve(); // do not recurse
+                callerResolve(); // stop recursing
             } else {
                 sleepAsync(sleepMilliseconds).then(
                     () => {repeatAsyncHelper(callerResolve, callerReject, task, sleepMilliseconds, startTimeMilliseconds, timeToLiveMilliseconds);}, // recurse
-                    () => {callerReject('ERROR: Sleep failed.');},
+                    () => {callerReject('Sleep failed.');}, // stop recursing
                 );
             }
         },
-        () => {callerReject('ERROR: User-defined task failed.');},
+        () => {callerReject('User-defined task failed.');}, // stop recursing
     );
 };
 
