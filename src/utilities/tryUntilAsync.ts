@@ -49,24 +49,24 @@ const tryUntilAsyncHelper = <TTaskResult>(
             consoleGroup();
             consoleError(reason);
             consoleGroupEnd();
-            // If we have run out of time OR will run out of time during the next sleep, then stop recursing.
-            // Note: In order to use up 100% of the allotted time (which is cut short when we detect we'll time out
-            // during the next sleep), we could sleep for the remaining time before rejecting, but that seems pointless.
+            // If we have run out of time OR will run out of time during the next sleep...
             const sleepMillisecondsNumber: number = sleepMillisecondsFunction(recursionIndex);
             if (typeof timeToLiveMilliseconds === 'number') {
                 const remainingMs: number = timeToLiveMilliseconds - (Date.now() - startTimeMilliseconds);
                 if (remainingMs <= 0 || remainingMs < sleepMillisecondsNumber) {
-                    callerReject('Timed out.');
+                    callerReject('Timed out.'); // ...then reject the caller Promise...
+                    return; // ...and stop here (do not recurse).
                 }
             }
-            // If we have run out of tries, then stop recursing.
+            // If we have run out of tries...
             if (typeof remainingNumberOfTries === 'number' && remainingNumberOfTries <= 1) {
-                callerReject('Ran out of tries.');
+                callerReject('Ran out of tries.'); // ...then reject the caller Promise...
+                return; // ...and stop here (do not recurse).
             }
-            // Otherwise, sleep and try again.
-            sleepAsync(sleepMillisecondsNumber).then(
+            // Otherwise...
+            sleepAsync(sleepMillisecondsNumber).then( // ...sleep...
                 () => {
-                    tryUntilAsyncHelper( // Recurse.
+                    tryUntilAsyncHelper( // ...and recurse.
                         callerResolve,
                         callerReject,
                         promisifiedTask,
@@ -81,7 +81,7 @@ const tryUntilAsyncHelper = <TTaskResult>(
                     );
                 },
                 () => {
-                    callerReject('Sleep failed.'); // This should never happen, but if it does then stop recursing.
+                    callerReject('Sleep failed.'); // This should never happen, but if it does then reject the caller Promise and do not recurse.
                 },
             );
         },
