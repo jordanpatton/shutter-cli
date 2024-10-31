@@ -123,7 +123,7 @@ interface ITryUntilAsyncOptions {
  * 
  * @param task - User-defined behavior to be tried.
  * @param options - Options.
- * @returns Promisified `task` result. Settles when `task` succeeds, this function times out, or this function runs out
+ * @returns Promisified `task` result. Resolves when `task` succeeds. Rejects when this function times out or runs out
  *          of tries.
  */
 export const tryUntilAsync = <TTaskResult>(
