@@ -1,3 +1,4 @@
+import { tryUntilAsync } from '../../../utilities/tryUntilAsync.js';
 import { THISLIFE_JSON_URL } from '../constants.js';
 import { IThisLifeJsonResponseJson } from '../types.js';
 
@@ -77,7 +78,10 @@ export const fetchSkeleton = async (
     startTimeUnixSeconds: number;
 } | void> => {
     const _cognitoIdToken: string = typeof cognitoIdToken === 'function' ? await cognitoIdToken() : cognitoIdToken;
-    const { momentCount, skeleton } = await fetchSkeletonViaApi(_cognitoIdToken);
+    const { momentCount, skeleton } = await tryUntilAsync(
+        () => fetchSkeletonViaApi(_cognitoIdToken),
+        { maximumNumberOfTries: 3, sleepMilliseconds: (ri) => 2000 * Math.pow(2, ri) }, // exponential backoff
+    );
     if (!Array.isArray(skeleton) || !skeleton.length) {
         console.log('Request succeeded, but skeleton is empty.');
         return;

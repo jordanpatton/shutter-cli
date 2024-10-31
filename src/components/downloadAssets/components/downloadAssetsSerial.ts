@@ -5,6 +5,7 @@ import {
 } from '../../../utilities/downloadAsync.js';
 import { getFileNameParts } from '../../../utilities/getFileNameParts.js';
 import { sleepAsync } from '../../../utilities/sleepAsync.js';
+import { tryUntilAsync } from '../../../utilities/tryUntilAsync.js';
 import { IMoment } from '../types.js';
 
 const THISLIFE_DOWNLOAD_URL = 'https://io.thislife.com/download';
@@ -35,29 +36,32 @@ export const downloadAssetsSerial = async (
         }
         const _cognitoIdToken: string = typeof cognitoIdToken === 'function' ? await cognitoIdToken() : cognitoIdToken;
         console.log(`Downloading asset ${i + 1} of ${moments.length} (moment ${moments[i].uid})...`);
-        await downloadAsync({
-            fetchOptions: {
-                body: null,
-                headers: { // All of these headers are optional. (Request works without them.)
-                    // 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-                    // 'accept-language': 'en-US,en;q=0.9',
-                    'cache-control': 'no-cache',
-                    'pragma': 'no-cache'
+        await tryUntilAsync(
+            () => downloadAsync({
+                fetchOptions: {
+                    body: null,
+                    headers: { // All of these headers are optional. (Request works without them.)
+                        // 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+                        // 'accept-language': 'en-US,en;q=0.9',
+                        'cache-control': 'no-cache',
+                        'pragma': 'no-cache'
+                    },
+                    method: 'GET'
                 },
-                method: 'GET'
-            },
-            fromUrl: `${THISLIFE_DOWNLOAD_URL}?accessToken=${encodeURIComponent(_cognitoIdToken)}&momentId=${encodeURIComponent(moments[i].uid)}&source=library`,
-            toDirectory,
-            toFileName: (contentDispositionFileName = DEFAULT_DOWNLOAD_FILE_NAME) => {
-                // Convert 1234567890 => 1234567890000 => '2009-02-13T23:31:30.000Z' => '2009-02-13 23_31_30'.
-                const momentDate = new Date(parseInt(moments[i].moment_date, 10) * 1000);
-                const dateString = momentDate.toISOString().replace(/T/g, ' ').replace(/:/g, '_').split('.')[0];
-                // Separate base name from extension.
-                const { baseName, extension } = getFileNameParts(contentDispositionFileName);
-                // Combine. Example: '2009-02-13 23_31_30 vacation (1836271517531475).jpg'
-                return `${dateString} ${baseName} (${moments[i].uid})${typeof extension === 'string' ? `.${extension}` : ''}`;
-            },
-        });
+                fromUrl: `${THISLIFE_DOWNLOAD_URL}?accessToken=${encodeURIComponent(_cognitoIdToken)}&momentId=${encodeURIComponent(moments[i].uid)}&source=library`,
+                toDirectory,
+                toFileName: (contentDispositionFileName = DEFAULT_DOWNLOAD_FILE_NAME) => {
+                    // Convert 1234567890 => 1234567890000 => '2009-02-13T23:31:30.000Z' => '2009-02-13 23_31_30'.
+                    const momentDate = new Date(parseInt(moments[i].moment_date, 10) * 1000);
+                    const dateString = momentDate.toISOString().replace(/T/g, ' ').replace(/:/g, '_').split('.')[0];
+                    // Separate base name from extension.
+                    const { baseName, extension } = getFileNameParts(contentDispositionFileName);
+                    // Combine. Example: '2009-02-13 23_31_30 vacation (1836271517531475).jpg'
+                    return `${dateString} ${baseName} (${moments[i].uid})${typeof extension === 'string' ? `.${extension}` : ''}`;
+                },
+            }),
+            { maximumNumberOfTries: 3, sleepMilliseconds: (ri) => 2000 * Math.pow(2, ri) }, // exponential backoff
+        );
     }
     return;
 };

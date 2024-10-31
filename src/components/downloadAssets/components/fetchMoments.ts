@@ -1,4 +1,5 @@
 import { sleepAsync } from '../../../utilities/sleepAsync.js';
+import { tryUntilAsync } from '../../../utilities/tryUntilAsync.js';
 import { THISLIFE_JSON_URL } from '../constants.js';
 import { IMoment, IThisLifeJsonResponseJson } from '../types.js';
 
@@ -106,11 +107,14 @@ export const fetchMoments = async (
         }
         const _cognitoIdToken: string = typeof cognitoIdToken === 'function' ? await cognitoIdToken() : cognitoIdToken;
         // Fetch a page of moments. Pagination occurs from newest to oldest, so end time is the only moving target.
-        const payload = await fetchPaginatedMomentsViaApi(
-            _cognitoIdToken,
-            startTimeUnixSeconds,
-            typeof previousOldestMomentTimestamp === 'number' ? previousOldestMomentTimestamp : endTimeUnixSeconds,
-            1000, // The more items per page, the less likely it is that we'll end up in an infinite loop.
+        const payload = await tryUntilAsync(
+            () => fetchPaginatedMomentsViaApi(
+                _cognitoIdToken,
+                startTimeUnixSeconds,
+                typeof previousOldestMomentTimestamp === 'number' ? previousOldestMomentTimestamp : endTimeUnixSeconds,
+                1000, // The more items per page, the less likely it is that we'll end up in an infinite loop.
+            ),
+            { maximumNumberOfTries: 3, sleepMilliseconds: (ri) => 2000 * Math.pow(2, ri) }, // exponential backoff
         );
         // Verify that the response payload contains data.
         if (Array.isArray(payload)) {

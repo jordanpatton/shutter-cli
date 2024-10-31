@@ -1,3 +1,4 @@
+import { tryUntilAsync } from '../../../../../utilities/tryUntilAsync.js';
 import {
     COGNITO_TOKEN_NAME_POSTFIX_ACCESS_TOKEN,
     COGNITO_TOKEN_NAME_POSTFIX_ID_TOKEN,
@@ -68,7 +69,10 @@ export const refreshSession = async (
     const refreshTimeUnixMilliseconds = Date.now();
     // In order to force a refresh of `accessToken` and `idToken`, we only send `refreshToken` here. If we send all
     // of the Cognito tokens, the server may or may not refresh depending on expiration logic that is unknown to us.
-    const responseJson = await fetchTokensViaApi(`${oldRefreshToken.name}=${oldRefreshToken.value}`);
+    const responseJson = await tryUntilAsync(
+        () => fetchTokensViaApi(`${oldRefreshToken.name}=${oldRefreshToken.value}`),
+        { maximumNumberOfTries: 3, sleepMilliseconds: (ri) => 2000 * Math.pow(2, ri) }, // exponential backoff
+    );
     // We don't need to check for duplicate `accessToken` or `idToken` here because we used the simplified refresh
     // above. If `accessToken` and `idToken` exist in the response body with valid values, then they are new.
     const newAccessToken = responseJson.find(v => v.name.endsWith(COGNITO_TOKEN_NAME_POSTFIX_ACCESS_TOKEN));
