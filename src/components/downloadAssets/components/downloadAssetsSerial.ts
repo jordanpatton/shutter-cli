@@ -60,7 +60,7 @@ export const downloadAssetsSerial = async (
                     return `${dateString} ${baseName} (${moments[i].uid})${typeof extension === 'string' ? `.${extension}` : ''}`;
                 },
             }),
-            { maximumNumberOfTries: 3, sleepMilliseconds: (ri) => 2000 * Math.pow(2, ri) }, // exponential backoff
+            { isVerbose: true, maximumNumberOfTries: 5, sleepMilliseconds: (ri) => 5000 * Math.pow(2, ri) }, // exponential backoff
         );
     }
     return;

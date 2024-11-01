@@ -80,7 +80,7 @@ export const fetchSkeleton = async (
     const _cognitoIdToken: string = typeof cognitoIdToken === 'function' ? await cognitoIdToken() : cognitoIdToken;
     const { momentCount, skeleton } = await tryUntilAsync(
         () => fetchSkeletonViaApi(_cognitoIdToken),
-        { maximumNumberOfTries: 3, sleepMilliseconds: (ri) => 2000 * Math.pow(2, ri) }, // exponential backoff
+        { isVerbose: true, maximumNumberOfTries: 3, sleepMilliseconds: (ri) => 2000 * Math.pow(2, ri) }, // exponential backoff
     );
     if (!Array.isArray(skeleton) || !skeleton.length) {
         console.log('Request succeeded, but skeleton is empty.');

@@ -114,7 +114,7 @@ export const fetchMoments = async (
                 typeof previousOldestMomentTimestamp === 'number' ? previousOldestMomentTimestamp : endTimeUnixSeconds,
                 1000, // The more items per page, the less likely it is that we'll end up in an infinite loop.
             ),
-            { maximumNumberOfTries: 3, sleepMilliseconds: (ri) => 2000 * Math.pow(2, ri) }, // exponential backoff
+            { isVerbose: true, maximumNumberOfTries: 3, sleepMilliseconds: (ri) => 2000 * Math.pow(2, ri) }, // exponential backoff
         );
         // Verify that the response payload contains data.
         if (Array.isArray(payload)) {

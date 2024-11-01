@@ -71,7 +71,7 @@ export const refreshSession = async (
     // of the Cognito tokens, the server may or may not refresh depending on expiration logic that is unknown to us.
     const responseJson = await tryUntilAsync(
         () => fetchTokensViaApi(`${oldRefreshToken.name}=${oldRefreshToken.value}`),
-        { maximumNumberOfTries: 3, sleepMilliseconds: (ri) => 2000 * Math.pow(2, ri) }, // exponential backoff
+        { isVerbose: true, maximumNumberOfTries: 3, sleepMilliseconds: (ri) => 2000 * Math.pow(2, ri) }, // exponential backoff
     );
     // We don't need to check for duplicate `accessToken` or `idToken` here because we used the simplified refresh
     // above. If `accessToken` and `idToken` exist in the response body with valid values, then they are new.
