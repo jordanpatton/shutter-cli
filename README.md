@@ -36,6 +36,7 @@ node ./dist/index.js --command download-assets
 
 ## Links
 - [Node.js](https://nodejs.org)
+- [Node Fetch](https://github.com/node-fetch/node-fetch) (to bypass native `fetch`'s forbidden header limitations)
 - [Puppeteer](https://pptr.dev)
 - [Shutterfly](https://www.shutterfly.com)
 - [TSDoc](https://tsdoc.org)

@@ -1,5 +1,7 @@
+import { default as nodeFetch } from 'node-fetch';
+
 import { tryUntilAsync } from '../../../utilities/tryUntilAsync.js';
-import { THISLIFE_JSON_URL } from '../constants.js';
+import { SHUTTERFLY_PHOTOS_URL, THISLIFE_JSON_URL } from '../constants.js';
 import { IThisLifeJsonResponseJson } from '../types.js';
 
 /** Payload format for successful request to `getSkeleton` (with or without data in the response). */
@@ -34,13 +36,14 @@ const fetchSkeletonViaApi = async (
         `"${cognitoIdToken}"`, // {string} Amazon Cognito identification token.
         'false',               // {boolean} Whether or not to sort by upload date.
     ];
-    const response = await fetch(`${THISLIFE_JSON_URL}?method=getSkeleton`, {
+    const response = await nodeFetch(`${THISLIFE_JSON_URL}?method=getSkeleton`, {
         body: `{"method":"getSkeleton","params":[${stringifiedBodyParams.join(',')}],"headers":{"X-SFLY-SubSource":"library"},"id":null}`,
         headers: { // All of these headers are optional. (Request works without them.)
             // 'accept': 'application/json, text/javascript, */*; q=0.01',
             // 'accept-language': 'en-US,en;q=0.9',
             'cache-control': 'no-cache',
             'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'origin': SHUTTERFLY_PHOTOS_URL, // forbidden in browser; enabled by node-fetch
             'pragma': 'no-cache'
         },
         method: 'POST'
@@ -48,7 +51,7 @@ const fetchSkeletonViaApi = async (
     if (!response.ok) {
         throw new Error(`[${response.status}] ${response.statusText}`);
     }
-    const responseJson: TGetSkeletonResponseJson = await response.json();
+    const responseJson = await response.json() as TGetSkeletonResponseJson;
     // HTTP response code may be 200, but response body can still indicate failure.
     if (!responseJson.result.success) {
         throw new Error(`Failed to fetch skeleton. (${responseJson.result.message})`);

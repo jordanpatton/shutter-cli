@@ -12,6 +12,7 @@
         "shutterfly"
     ],
     "dependencies": {
+        "node-fetch": "^3.3.2",
         "puppeteer": "^23.4.0"
     },
     "devDependencies": {

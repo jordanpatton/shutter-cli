@@ -1,6 +1,8 @@
+import { default as nodeFetch } from 'node-fetch';
+
 import { sleepAsync } from '../../../utilities/sleepAsync.js';
 import { tryUntilAsync } from '../../../utilities/tryUntilAsync.js';
-import { THISLIFE_JSON_URL } from '../constants.js';
+import { SHUTTERFLY_PHOTOS_URL, THISLIFE_JSON_URL } from '../constants.js';
 import { IMoment, IThisLifeJsonResponseJson } from '../types.js';
 
 /** Payload format for successful request to `getPaginatedMoments` (with data in the response). */
@@ -57,13 +59,14 @@ const fetchPaginatedMomentsViaApi = async (
         '""',                             // {string} Moment type. Known good values: "", "image".
         'true',                           // {boolean} Whether or not to include `encrypted_id` in returned `moments` items.
     ];
-    const response = await fetch(`${THISLIFE_JSON_URL}?method=getPaginatedMoments`, {
+    const response = await nodeFetch(`${THISLIFE_JSON_URL}?method=getPaginatedMoments`, {
         body: `{"method":"getPaginatedMoments","params":[${stringifiedBodyParams.join(',')}],"headers":{"X-SFLY-SubSource":"library"},"id":null}`,
         headers: { // All of these headers are optional. (Request works without them.)
             // 'accept': 'application/json, text/javascript, */*; q=0.01',
             // 'accept-language': 'en-US,en;q=0.9',
             'cache-control': 'no-cache',
             'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'origin': SHUTTERFLY_PHOTOS_URL, // forbidden in browser; enabled by node-fetch
             'pragma': 'no-cache'
         },
         method: 'POST'
@@ -71,7 +74,7 @@ const fetchPaginatedMomentsViaApi = async (
     if (!response.ok) {
         throw new Error(`[${response.status}] ${response.statusText}`);
     }
-    const responseJson: TGetPaginatedMomentsResponseJson = await response.json();
+    const responseJson = await response.json() as TGetPaginatedMomentsResponseJson;
     // HTTP response code may be 200, but response body can still indicate failure.
     if (!responseJson.result.success) {
         throw new Error(`Failed to fetch paginated moments. (${responseJson.result.message})`);
