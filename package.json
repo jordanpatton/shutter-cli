@@ -1,6 +1,6 @@
 {
     "name": "shutter-cli",
-    "description": "Unofficial Shutterfly Command-Line Interface",
+    "description": "Unofficial command-line interface for Shutterfly",
     "version": "0.0.0",
     "license": "MIT",
     "author": "Jordan Patton",
