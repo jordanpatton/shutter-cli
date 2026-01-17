@@ -29,9 +29,9 @@ node ./dist/index.js --command download-assets
 - `fixtures`: Sample requests, responses, and other data structures.
 - `ignore`: Git-ignored folder for transient data (cached sessions, downloaded files, etc.). If you download something without specifying a destination directory, then it will most likely end up here.
 - `src`: Business logic.
-  - `components`: The component tree for this application containing large workflows, medium-sized tasks, and miniscule sub-tasks. This codebase favors composition over inheritance, and components may reference one another as needed. Structure changes to match relationships between components.
+  - `components`: Component tree containing large workflows, medium-sized tasks, and miniscule sub-tasks. This codebase favors composition over inheritance, and components may reference one another as needed. Structure changes to match relationships between components.
   - `utilities`: Tools that aren't specific to this application. (They typically have nothing to do with Shutterfly.) Utilities could be abstracted into their own codebase and imported to this one if needed.
-  - `index`: The entrypoint for this application. Receives commands from the end user via the command line and invokes business logic accordingly.
+  - `index`: Entrypoint for this application. Receives commands from the end user via the command line and invokes business logic accordingly.
 - `tsd`: TypeScript definitions that are not specific to this application. Declares items that should not be type-checked and hosts type definitions for any packages that don't provide their own.
 
 ## Links

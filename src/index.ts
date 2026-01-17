@@ -3,7 +3,7 @@ import { downloadAssets, parseDownloadAssetsParameters } from './components/down
 import { getCommandLineParameter } from './utilities/getCommandLineParameter.js';
 
 /**
- * Main entrypoint for this program.
+ * Entrypoint for this application.
  * 
  * @returns Command result or void.
  */
